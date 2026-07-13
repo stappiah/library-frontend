@@ -1,65 +1,114 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Globe2, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { AnnouncementBar } from "@/components/sections/announcement-bar";
+import { CategoryCard } from "@/components/sections/category-card";
+import { HeroSection } from "@/components/sections/hero-section";
+import { Newsletter } from "@/components/sections/newsletter";
+import { ProductGrid } from "@/components/sections/product-grid";
+import { PromotionalBanner } from "@/components/sections/promotional-banner";
+import { TestimonialCard } from "@/components/sections/testimonial-card";
+import { brandLogos } from "@/data/mock";
+import { getCategories, getFeaturedProducts, getTestimonials } from "@/lib/services/catalog-service";
 
-export default function Home() {
+export default async function Home() {
+  const [featuredProducts, categories, testimonials] = await Promise.all([
+    getFeaturedProducts(3),
+    getCategories(),
+    getTestimonials(),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <AnnouncementBar />
+      <HeroSection />
+
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Featured collection</p>
+            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">A carefully edited selection for the season</h2>
+          </div>
+          <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
+            View all products
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="mt-6">
+          <ProductGrid products={featuredProducts} />
         </div>
-      </main>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="rounded-[32px] border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Why shoppers stay</p>
+              <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Designed to feel premium from first click to final delivery.</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                { label: "Premium materials", icon: Sparkles },
+                { label: "Transparent shipping", icon: Globe2 },
+                { label: "Trusted checkout", icon: ShieldCheck },
+              ].map((item) => (
+                <div key={item.label} className="rounded-[24px] bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
+                  <item.icon className="h-5 w-5 text-zinc-950 dark:text-white" />
+                  <p className="mt-3 text-sm font-semibold text-zinc-950 dark:text-white">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Trending categories</p>
+            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Browse the most-loved collections</h2>
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} />
+          ))}
+        </div>
+      </section>
+
+      <PromotionalBanner />
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">What customers say</p>
+            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Loved by modern shoppers and growing teams</h2>
+          </div>
+          <div className="hidden items-center gap-2 text-sm font-semibold text-amber-500 sm:flex">
+            <Star className="h-4 w-4 fill-current" />
+            Rated 4.9/5 across every collection
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          {testimonials.map((testimonial) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="rounded-[30px] border border-zinc-200 bg-white px-6 py-8 dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Trusted by design-led brands</p>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {brandLogos.map((brand) => (
+              <div key={brand} className="rounded-[24px] bg-zinc-50 px-4 py-5 text-center text-sm font-semibold text-zinc-700 dark:bg-zinc-950 dark:text-zinc-200">
+                {brand}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Newsletter />
     </div>
   );
 }
