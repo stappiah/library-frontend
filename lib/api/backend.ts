@@ -150,12 +150,18 @@ async function performRequest<T>(opts: {
   }
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-  const res = await fetch(url.toString(), {
-    method,
-    headers,
-    body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
-    signal,
-  });
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), {
+      method,
+      headers,
+      body: isFormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
+    });
+  } catch (err: any) {
+    // Normalize network errors into ApiError so callers can handle them.
+    throw { message: `Network request failed: ${err?.message ?? String(err)}`, details: err } as ApiError;
+  }
 
   const text = await res.text();
   const parsed = text ? safeJsonParse(text) : undefined;

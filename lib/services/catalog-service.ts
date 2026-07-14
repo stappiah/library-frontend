@@ -69,16 +69,25 @@ function normalizeProduct(b: any): Product {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const res = await apiFetch<any[]>({ path: "/api/v1/categories/" });
-  return res.map((c) => ({
-    id: String(c.id),
-    name: String(c.name),
-    slug: String(c.slug),
-    // frontend type expects icon + count; backend provides `image`.
-    icon: typeof c.image === "string" ? c.image : "",
-    description: String(c.description ?? ""),
-    count: 0,
-  })) as unknown as Category[];
+  try {
+    const res = await apiFetch<any[]>({ path: "/api/v1/categories/" });
+    return res.map((c) => ({
+      id: String(c.id),
+      name: String(c.name),
+      slug: String(c.slug),
+      // frontend type expects icon + count; backend provides `image`.
+      icon: typeof c.image === "string" ? c.image : "",
+      description: String(c.description ?? ""),
+      count: 0,
+    })) as unknown as Category[];
+  } catch (err) {
+    // Fail gracefully when backend is unreachable (e.g., local dev backend not running).
+    // Return an empty list so pages can render without crashing.
+    // Keep a console error to aid debugging.
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch categories from backend:", err);
+    return [];
+  }
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {
@@ -239,12 +248,19 @@ export async function createBook(data: {
 }
 
 export async function getProducts(filters: CatalogBookFilters = {}): Promise<Product[]> {
-  const res = await apiFetch<any[]>({
-    path: "/api/v1/books/",
-    query: filters as any,
-  });
+  try {
+    const res = await apiFetch<any[]>({
+      path: "/api/v1/books/",
+      query: filters as any,
+    });
 
-  return res.map((b) => normalizeProduct(b));
+    return res.map((b) => normalizeProduct(b));
+  } catch (err) {
+    // If the backend cannot be reached, log and return an empty product list.
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch products from backend:", err);
+    return [];
+  }
 }
 
 export async function getFeaturedProducts(limit = 3): Promise<Product[]> {
