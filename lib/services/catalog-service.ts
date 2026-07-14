@@ -1,5 +1,12 @@
-import type { Category, Order, Product, Review, Testimonial, UserProfile, VendorProfile } from "@/types/ecommerce";
-
+import type {
+  Category,
+  Order,
+  Product,
+  Review,
+  Testimonial,
+  UserProfile,
+  VendorProfile,
+} from "@/types/ecommerce";
 
 import { apiFetch } from "@/lib/api/backend";
 import { testimonials } from "@/data/mock";
@@ -30,7 +37,10 @@ function normalizeProduct(b: any): Product {
   // Map backend Book fields to the expected UI fields.
   const discountPercentage = b.discount_percentage;
   const price = Number(b.price);
-  const discountPrice = b.discount_price !== null && b.discount_price !== undefined ? Number(b.discount_price) : null;
+  const discountPrice =
+    b.discount_price !== null && b.discount_price !== undefined
+      ? Number(b.discount_price)
+      : null;
 
   return {
     id: Number(b.id) as unknown as number,
@@ -43,12 +53,17 @@ function normalizeProduct(b: any): Product {
     category: b.category?.slug ?? "",
     brand: b.vendor?.name ?? "",
     description: b.description,
-    highlights: ["Curated by faculty", "Available for classroom and self-study"],
-    images: (b.gallery_images?.map((img: any) => img.image).filter(Boolean) ?? []).length
+    highlights: [
+      "Curated by faculty",
+      "Available for classroom and self-study",
+    ],
+    images: (
+      b.gallery_images?.map((img: any) => img.image).filter(Boolean) ?? []
+    ).length
       ? b.gallery_images!.map((img: any) => img.image).filter(Boolean)
       : b.image_url
-      ? [b.image_url]
-      : [],
+        ? [b.image_url]
+        : [],
     colors: ["Midnight"],
     sizes: ["M", "L"],
     inventory: Number(b.stock ?? 0),
@@ -94,10 +109,8 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   return testimonials;
 }
 
-
 // Backend faculties endpoint exists, but the current frontend types
 // do not model Faculty. Keep this function only if/when UI uses it.
-
 
 export async function getVendors(): Promise<VendorProfile[]> {
   const res = await apiFetch<any[]>({ path: "/api/v1/vendors/" });
@@ -117,7 +130,9 @@ export async function getVendors(): Promise<VendorProfile[]> {
 }
 
 export async function getVendorBySlug(slug: string): Promise<VendorProfile> {
-  const v = await apiFetch<any>({ path: `/api/v1/vendors/${encodeURIComponent(slug)}/` });
+  const v = await apiFetch<any>({
+    path: `/api/v1/vendors/${encodeURIComponent(slug)}/`,
+  });
   return {
     id: String(v.id),
     userId: String(v.user ?? v.id),
@@ -134,19 +149,25 @@ export async function getVendorBySlug(slug: string): Promise<VendorProfile> {
 }
 
 export async function getProductsForVendor(slug: string): Promise<Product[]> {
-  const res = await apiFetch<any[]>({ path: "/api/v1/books/", query: { vendor: slug } });
+  const res = await apiFetch<any[]>({
+    path: "/api/v1/books/",
+    query: { vendor: slug },
+  });
   return res.map((b) => normalizeProduct(b));
 }
 
-export async function createVendor(data: {
-  name: string;
-  description?: string;
-  website?: string;
-  phone?: string;
-  address?: string;
-  email?: string;
-  is_active?: boolean;
-}, accessToken?: string | null): Promise<VendorProfile> {
+export async function createVendor(
+  data: {
+    name: string;
+    description?: string;
+    website?: string;
+    phone?: string;
+    address?: string;
+    email?: string;
+    is_active?: boolean;
+  },
+  accessToken?: string | null,
+): Promise<VendorProfile> {
   const res = await apiFetch<any>({
     path: "/api/v1/vendors/",
     method: "POST",
@@ -169,24 +190,27 @@ export async function createVendor(data: {
   } as VendorProfile;
 }
 
-export async function createBook(data: {
-  title: string;
-  author: string;
-  description: string;
-  price: number;
-  stock: number;
-  image_url?: string;
-  imageFile?: File | null;
-  galleryFiles?: File[];
-  category?: string;
-  discount_price?: number | null;
-  isbn?: string;
-  publisher?: string;
-  publication_year?: number | null;
-  pages?: number | null;
-  language?: string;
-  is_featured?: boolean;
-}, accessToken?: string | null): Promise<Product> {
+export async function createBook(
+  data: {
+    title: string;
+    author: string;
+    description: string;
+    price: number;
+    stock: number;
+    image_url?: string;
+    imageFile?: File | null;
+    galleryFiles?: File[];
+    category?: string;
+    discount_price?: number | null;
+    isbn?: string;
+    publisher?: string;
+    publication_year?: number | null;
+    pages?: number | null;
+    language?: string;
+    is_featured?: boolean;
+  },
+  accessToken?: string | null,
+): Promise<Product> {
   let body: any = {
     title: data.title,
     author: data.author,
@@ -219,15 +243,17 @@ export async function createBook(data: {
       }
     });
     if (data.imageFile) {
-      formData.append('image', data.imageFile);
+      formData.append("image", data.imageFile);
     }
 
     if (data.galleryFiles?.length) {
-      data.galleryFiles.forEach((file) => formData.append('gallery_images', file));
+      data.galleryFiles.forEach((file) =>
+        formData.append("gallery_images", file),
+      );
     }
 
     if (data.image_url) {
-      formData.append('image_url', data.image_url);
+      formData.append("image_url", data.image_url);
     }
 
     body = formData;
@@ -247,7 +273,9 @@ export async function createBook(data: {
   return normalizeProduct(res);
 }
 
-export async function getProducts(filters: CatalogBookFilters = {}): Promise<Product[]> {
+export async function getProducts(
+  filters: CatalogBookFilters = {},
+): Promise<Product[]> {
   try {
     const res = await apiFetch<any[]>({
       path: "/api/v1/books/",
@@ -268,12 +296,16 @@ export async function getFeaturedProducts(limit = 3): Promise<Product[]> {
   return res.slice(0, limit);
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+export async function getProductBySlug(
+  slug: string,
+): Promise<Product | undefined> {
   if (!slug) {
     return undefined;
   }
 
-  const res = await apiFetch<any>({ path: `/api/v1/books/${encodeURIComponent(slug)}/` });
+  const res = await apiFetch<any>({
+    path: `/api/v1/books/${encodeURIComponent(slug)}/`,
+  });
 
   const reviewsRes = await apiFetch<any[]>({
     path: `/api/v1/books/${encodeURIComponent(slug)}/reviews/`,
@@ -290,23 +322,25 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 function mapOrderResponse(order: any): Order {
   return {
     id: String(order.id),
-    date: order.created_at ? new Date(order.created_at).toLocaleDateString() : order.order_number || '',
-    status: order.status ?? 'pending',
+    date: order.created_at
+      ? new Date(order.created_at).toLocaleDateString()
+      : order.order_number || "",
+    status: order.status ?? "pending",
     total: Number(order.total_price ?? 0),
     items: Array.isArray(order.items) ? order.items.length : 0,
     userId: order.user ? String(order.user) : undefined,
-    orderNumber: String(order.order_number ?? order.id ?? ''),
+    orderNumber: String(order.order_number ?? order.id ?? ""),
     createdAt: order.created_at,
     itemsDetail: Array.isArray(order.items)
       ? order.items.map((item: any) => ({
           id: String(item.id),
           productId: Number(item.book?.id ?? item.book_id ?? 0),
-          title: item.book?.title ?? item.book_title ?? '',
+          title: item.book?.title ?? item.book_title ?? "",
           quantity: Number(item.quantity ?? 0),
           unitPrice: Number(item.price ?? 0),
           subtotal: Number(item.price ?? 0) * Number(item.quantity ?? 0),
           vendorId: Number(item.book?.vendor?.id ?? 0),
-          vendorName: item.book?.vendor?.name ?? '',
+          vendorName: item.book?.vendor?.name ?? "",
         }))
       : undefined,
     shippingAddress: order.shipping_address,
@@ -314,7 +348,9 @@ function mapOrderResponse(order: any): Order {
   };
 }
 
-export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
+export async function getProductsByCategory(
+  categorySlug: string,
+): Promise<Product[]> {
   const res = await getProducts({ category: categorySlug });
   return res;
 }
@@ -325,18 +361,23 @@ export async function getOrders(accessToken?: string | null): Promise<Order[]> {
   return res.map(mapOrderResponse);
 }
 
-export async function getOrdersForUser(accessToken: string | null): Promise<Order[]> {
+export async function getOrdersForUser(
+  accessToken: string | null,
+): Promise<Order[]> {
   return getOrders(accessToken);
 }
 
-export async function createOrder(accessToken: string, orderData: {
-  shipping_address: string;
-  phone: string;
-  email?: string;
-  billing_address?: string;
-  notes?: string;
-  items: Array<{ book_id: number; quantity: number }>;
-}): Promise<Order> {
+export async function createOrder(
+  accessToken: string,
+  orderData: {
+    shipping_address: string;
+    phone: string;
+    email?: string;
+    billing_address?: string;
+    notes?: string;
+    items: Array<{ book_id: number; quantity: number }>;
+  },
+): Promise<Order> {
   const res = await apiFetch<any>({
     path: "/api/v1/orders/",
     method: "POST",
@@ -347,17 +388,31 @@ export async function createOrder(accessToken: string, orderData: {
   return mapOrderResponse(res);
 }
 
-export async function getUserProfile(accessToken: string): Promise<UserProfile> {
+export async function getUserProfile(
+  accessToken: string,
+): Promise<UserProfile> {
   const res = await apiFetch<any>({ path: "/api/v1/auth/me/", accessToken });
   // Best-effort mapping for UI type.
   return {
     id: String(res.id),
-    name: typeof res.name === 'string' ? res.name : `${res.first_name ?? ''} ${res.last_name ?? ''}`.trim() || res.email?.split('@')[0] || '',
-    email: String(res.email ?? ''),
-    plan: typeof res.plan === 'string' ? res.plan : 'Student',
-    joined: typeof res.created_at === 'string' ? res.created_at : new Date().toISOString().slice(0, 10),
-    role: res.role === 'professor' || res.role === 'vendor' ? 'vendor' : res.role === 'admin' ? 'admin' : 'customer',
-    avatarUrl: typeof res.avatarUrl === 'string' ? res.avatarUrl : undefined,
+    name:
+      typeof res.name === "string"
+        ? res.name
+        : `${res.first_name ?? ""} ${res.last_name ?? ""}`.trim() ||
+          res.email?.split("@")[0] ||
+          "",
+    email: String(res.email ?? ""),
+    plan: typeof res.plan === "string" ? res.plan : "Student",
+    joined:
+      typeof res.created_at === "string"
+        ? res.created_at
+        : new Date().toISOString().slice(0, 10),
+    role:
+      res.role === "professor" || res.role === "vendor"
+        ? "vendor"
+        : res.role === "admin"
+          ? "admin"
+          : "customer",
+    avatarUrl: typeof res.avatarUrl === "string" ? res.avatarUrl : undefined,
   };
 }
-
