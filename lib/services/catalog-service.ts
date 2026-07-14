@@ -16,7 +16,7 @@ type BackendReview = {
   user_name?: string;
   rating: number;
   title?: string;
-  content?: string;
+  content?: string; 
   helpful_count?: number;
   created_at?: string;
 };
