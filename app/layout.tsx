@@ -31,8 +31,8 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
-  title: "Luma Atelier | Premium storefront",
-  description: "An elevated ecommerce storefront with premium product storytelling and modern commerce UI.",
+  title: "Ktu e bookshop | Tertiary Education E-Books",
+  description: "Your premier online bookshop for tertiary education e-books in Ghana. Quality reading materials for university students.",
 };
 
 export default function RootLayout({

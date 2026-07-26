@@ -50,9 +50,9 @@ export default function ShopPage() {
         const matchesBrand = selectedBrand === "All" || product.brand === selectedBrand;
         const matchesPrice =
           priceRange === "All" ||
-          (priceRange === "Under $100" && product.price < 100) ||
-          (priceRange === "$100 - $200" && product.price >= 100 && product.price <= 200) ||
-          (priceRange === "$200+" && product.price > 200);
+          (priceRange === "Under ₵100" && product.price < 100) ||
+          (priceRange === "₵100 - ₵200" && product.price >= 100 && product.price <= 200) ||
+          (priceRange === "₵200+" && product.price > 200);
 
         return matchesSearch && matchesCategory && matchesBrand && matchesPrice;
       })
@@ -70,8 +70,8 @@ export default function ShopPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Shop</p>
-          <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Explore curated essentials</h1>
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Shop E-books</p>
+          <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Browse quality e-books for tertiary education</h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">

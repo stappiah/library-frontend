@@ -185,7 +185,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="mt-6 rounded-[24px] border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
               <Truck className="h-4 w-4" />
-              Free shipping on orders over $150
+              Free shipping on orders over ₵1,500
             </div>
             <p className="mt-2 text-sm text-zinc-500">Estimated delivery: 3–5 business days</p>
           </div>

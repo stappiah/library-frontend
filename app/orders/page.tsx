@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken, selectIsAuthenticated } from "@/store/slices/authSlice";
 import { getOrders } from "@/lib/services/catalog-service";
+import { formatCurrency } from "@/lib/utils";
 import type { Order } from "@/types/ecommerce";
 
 export default function OrdersPage() {
@@ -58,7 +59,7 @@ export default function OrdersPage() {
               <span>{order.id}</span>
               <span>{order.date}</span>
               <span>{order.status}</span>
-              <span>{order.total.toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+              <span>{formatCurrency(order.total)}</span>
             </div>
           ))}
         </div>

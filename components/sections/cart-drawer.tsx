@@ -10,8 +10,9 @@ import { formatCurrency } from "@/lib/utils";
 
 export function CartDrawer() {
   const { cart, isCartOpen, closeCart, updateQuantity, removeFromCart } = useAppStore();
+  const safeCart = Array.isArray(cart) ? cart : [];
 
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const subtotal = safeCart.reduce((sum, item) => sum + (item?.product?.price ?? 0) * (item?.quantity ?? 0), 0);
 
   return (
     <AnimatePresence>
@@ -42,14 +43,14 @@ export function CartDrawer() {
             </div>
 
             <div className="mt-5 flex-1 space-y-4 overflow-y-auto">
-              {cart.length === 0 ? (
+              {safeCart.length === 0 ? (
                 <div className="rounded-[24px] border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
                   <ShoppingBag className="mx-auto h-8 w-8 text-zinc-500" />
                   <p className="mt-4 font-semibold">Your cart is empty</p>
                   <p className="mt-2 text-sm text-zinc-500">Add a few premium pieces to start building your collection.</p>
                 </div>
               ) : (
-                cart.map((item) => (
+                safeCart.map((item) => (
                   <div key={item.product.id} className="flex gap-3 rounded-[24px] border border-zinc-200 p-3 dark:border-zinc-800">
                     <div className="relative h-20 w-20 overflow-hidden rounded-[18px]">
                       {item.product.images[0] ? (
@@ -90,10 +91,6 @@ export function CartDrawer() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-zinc-500">Subtotal</span>
                 <span className="font-semibold">{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-zinc-500">Shipping</span>
-                <span className="font-semibold">Free</span>
               </div>
               <div className="mt-4">
                 <Link href="/checkout">

@@ -11,6 +11,20 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "localhost", port: "8000", pathname: "/media/**" },
     ],
   },
+  // Prevent stale cache issues by not caching pages aggressively
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

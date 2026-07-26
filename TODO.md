@@ -1,44 +1,61 @@
-# TODO - Next.js + Django integration
+# Project Implementation Progress - Ktu E-Bookshop
 
-## 1. Backend connection + env
-- [ ] Add `NEXT_PUBLIC_API_BASE_URL` to Next.js usage (and create/update `.env.local` if present)
+## ✅ Completed Tasks
 
-## 2. API client (JWT-aware)
-- [ ] Create `lib/api/backend.ts` (or refactor `lib/api/client.ts`) to call Django endpoints
-- [ ] Implement token handling (Authorization header) + optional refresh on 401
+### Step 1: Global Branding & Metadata Changes
+- ✅ `app/layout.tsx` - Updated title to "Ktu E-Bookshop | Tertiary Education E-Books" and description
+- ✅ `components/sections/navbar.tsx` - Changed "Luma Atelier" → "Ktu E-Bookshop"
+- ✅ `components/sections/footer.tsx` - Updated brand name to "Ktu E-Bookshop" with Ghana contact info (Accra, +233 number, Ghana email)
+- ✅ `app/Navbar.tsx` - Updated "NEXTRADE" → "EduBooks" branding
 
-## 3. Catalog service: replace mocks
-- [ ] Rewrite `lib/services/catalog-service.ts` to fetch from:
-  - [ ] /api/v1/categories/
-  - [ ] /api/v1/faculties/
-  - [ ] /api/v1/vendors/
-  - [ ] /api/v1/books/ (with filters)
-  - [ ] /api/v1/books/{slug}/reviews/
+### Step 2: Ghana Contact Info in Footer
+- ✅ `components/sections/footer.tsx` - Updated to:
+  - Phone: +233 50 000 0000
+  - Email: info@ktuebookshop.edu.gh
+  - Address: Accra, Ghana
 
-## 4. Auth slice: make it real
-- [ ] Update `store/slices/authSlice.ts` to also call `GET /api/v1/auth/me/` after login
-- [ ] Remove hardcoded endpoints; use `NEXT_PUBLIC_API_BASE_URL`
+### Step 3: Student/Lecturer Portal Separation
+- ✅ `components/sections/navbar.tsx` - "Vendor portal" only visible for vendor role users; renamed to "Lecturer Portal"
+- ✅ `app/vendors/page.tsx` - Updated to "Lecturer Portal" with educational theme
 
-## 5. Cart / Wishlist / Orders persistence
-- [ ] Rewrite `store/slices/cartSlice.ts` to sync with backend:
-  - [ ] loadCart: GET /api/v1/cart/
-  - [ ] addToCart: POST /api/v1/cart/add_item/
-  - [ ] updateQuantity: POST /api/v1/cart/update_item/
-  - [ ] removeFromCart: POST /api/v1/cart/remove_item/
-  - [ ] clearCart: POST /api/v1/cart/clear_cart/
-  - [ ] wishlist endpoints wired similarly
-- [ ] Update Checkout page to submit order:
-  - [ ] POST /api/v1/orders/ (from cart) with shipping_address + phone + email
-- [ ] Update Orders page and Account dashboard to load real orders
+### Step 4: Categories → Faculties
+- ✅ `data/mock.ts` - Updated categories to faculties with departments
+- ✅ `components/sections/filter-sidebar.tsx` - Replaced categories with faculties → departments dropdown
+- ✅ `app/shop/page.tsx` - Updated filter logic for faculties/departments
+- ✅ `app/categories/page.tsx` - Updated to show faculties grid
+- ✅ `app/categories/[slug]/page.tsx` - Updated for faculty/department routing
 
-## 6. Optional Next.js API proxy routes
-- [ ] Convert `app/api/*` mock wrappers into real proxies OR delete unused routes
+### Step 5: Checkout - Mobile Money Only
+- ✅ `app/checkout/page.tsx` - Simplified: removed shipping, card fields; added mobile money number; only name, email, mobile money; removed "Shipping" from summary
+- ✅ `components/sections/mobile-money-modal.tsx` - Created mobile money authorization popup
+- ✅ `app/cart/page.tsx` - Removed shipping/taxes from summary; only subtotal and total; "Pay with Mobile Money"
+- ✅ `components/sections/cart-drawer.tsx` - Removed shipping line from drawer
 
-## 7. Validate multi-vendor public behavior
-- [ ] Ensure vendors/categories/book listings use backend data and filters
+### Step 6: My Library & Download E-books
+- ✅ `components/sections/account-dashboard.tsx` - Added "My Library" tab with purchased ebooks and download buttons
+- ✅ `app/globals.css` - Added screenshot prevention CSS for `.my-library-content`
 
-## 8. Run & test
-- [ ] Start Django server
-- [ ] Start Next dev server
-- [ ] Manual smoke tests: browse, login, cart, checkout->order, orders list
+### Step 7: Shop → Shop E-books
+- ✅ `components/sections/navbar.tsx` - Changed "Shop" → "Shop E-books"
+- ✅ `app/shop/page.tsx` - Updated headings to "Shop E-books"
+
+### Step 8: Vendor Portal → Lecturer Portal (Upload E-books)
+- ✅ `app/vendors/[slug]/page.tsx` - Updated to "Lecturer" terminology
+- ✅ `app/vendors/page.tsx` - Renamed "Vendors" → "Lecturers / Upload E-books"
+
+### Step 9: "Explore Collections" → "Browse E-books"
+- ✅ `components/sections/announcement-bar.tsx` - Updated message and link text
+
+### Step 10: Cache/Reload Issue Fix
+- ✅ `next.config.ts` - Added no-store cache headers to prevent stale cache
+- ✅ `app/layout.tsx` - Already has good cache-busting scripts
+
+### Step 11: Card Payment Removed (Mobile Money Only)
+- ✅ `app/checkout/page.tsx` - All card fields removed
+- ✅ `lib/services/catalog-service.ts` - Updated createOrder to not require shipping address
+
+## Remaining Items
+- ⬜ Test the build to ensure no TypeScript errors
+- ⬜ Verify mobile money modal shows after checkout
+- ⬜ Ensure screenshot prevention works on library content
 

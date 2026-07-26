@@ -23,9 +23,9 @@ export default async function CategoriesPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8">
-          <h1 className="text-3xl font-bold text-red-800">Unable to load categories</h1>
+          <h1 className="text-3xl font-bold text-red-800">Unable to load faculties</h1>
           <p className="mt-4 text-base text-red-700">
-            There was a problem fetching categories and products from the backend.
+            There was a problem fetching faculties and products from the backend.
           </p>
           <p className="mt-3 text-sm text-red-600">{fetchError}</p>
         </div>
@@ -36,10 +36,10 @@ export default async function CategoriesPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="max-w-2xl">
-        <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Categories</p>
-        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">A premium map of every collection</h1>
+        <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Faculties</p>
+        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Browse e-books by faculty and department</h1>
         <p className="mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-300">
-          Explore collections from active vendors and curated subject areas.
+          Explore collections from various faculties and departments. Find recommended e-books from your lecturers.
         </p>
       </div>
 
@@ -52,11 +52,11 @@ export default async function CategoriesPage() {
       <div className="mt-12">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Best sellers</p>
-            <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Popular picks across the storefront</h2>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Popular e-books</p>
+            <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Top picks across all faculties</h2>
           </div>
           <Link href="/shop" className="text-sm font-semibold text-zinc-950 dark:text-white">
-            Browse all products
+            Browse all e-books
           </Link>
         </div>
         <div className="mt-6">

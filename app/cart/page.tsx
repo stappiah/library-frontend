@@ -15,7 +15,7 @@ export default function CartPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Cart</p>
-        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Review your final selection</h1>
+        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Review your e-books</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -23,7 +23,7 @@ export default function CartPage() {
           {cart.length === 0 ? (
             <div className="rounded-[30px] border border-dashed border-zinc-300 bg-white px-8 py-12 text-center dark:border-zinc-700 dark:bg-zinc-900">
               <p className="text-lg font-semibold">Your cart is empty</p>
-              <p className="mt-2 text-sm text-zinc-500">Add a few premium pieces and come back here to review your order.</p>
+              <p className="mt-2 text-sm text-zinc-500">Add some e-books to get started.</p>
               <Link href="/shop" className="mt-5 inline-flex text-sm font-semibold text-zinc-950 dark:text-white">
                 Continue shopping
               </Link>
@@ -72,16 +72,15 @@ export default function CartPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Order summary</p>
           <div className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>Free</span></div>
-            <div className="flex justify-between"><span>Taxes</span><span>{formatCurrency(subtotal * 0.08)}</span></div>
           </div>
           <div className="mt-5 border-t border-zinc-200 pt-4 dark:border-zinc-800">
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>{formatCurrency(subtotal * 1.08)}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
           </div>
-          <Link href="/checkout" className="mt-5 block">
+          <p className="mt-2 text-xs text-zinc-400">Pay with Mobile Money</p>
+          <Link href="/checkout" className="mt-3 block">
             <Button className="w-full">Continue to checkout</Button>
           </Link>
         </div>

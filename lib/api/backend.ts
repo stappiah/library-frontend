@@ -3,12 +3,12 @@
  */
 
 import {
-  clearAuthStorage,
   readAccessToken,
   readRefreshToken,
   writeAccessToken,
 } from "@/lib/api/auth-storage";
 import { getApiBaseUrl } from "@/lib/api/api-config";
+import { clearExpiredSession } from "./session-helpers";
 import { store } from "@/store/store";
 import { clearAuthSession, updateAuthTokens } from "@/store/slices/authSlice";
 
@@ -60,7 +60,9 @@ async function refreshAccessToken(): Promise<string> {
   refreshPromise = (async () => {
     const refreshToken = readRefreshToken();
     if (!refreshToken) {
-      clearAuthStorage();
+      clearExpiredSession({
+        dispatch: () => store.dispatch(clearAuthSession()),
+      });
       throw { message: "Missing refresh token", status: 401 } as ApiError;
     }
 
@@ -78,8 +80,9 @@ async function refreshAccessToken(): Promise<string> {
     const parsed = text ? safeJsonParse(text) : undefined;
 
     if (!response.ok) {
-      clearAuthStorage();
-      store.dispatch(clearAuthSession());
+      clearExpiredSession({
+        dispatch: () => store.dispatch(clearAuthSession()),
+      });
       const message =
         (parsed && typeof parsed === "object" && "detail" in parsed && typeof (parsed as any).detail === "string" && (parsed as any).detail) ||
         (parsed && typeof parsed === "object" && "message" in parsed && typeof (parsed as any).message === "string" && (parsed as any).message) ||
@@ -89,14 +92,17 @@ async function refreshAccessToken(): Promise<string> {
     }
 
     if (!parsed || typeof parsed !== "object") {
-      clearAuthStorage();
+      clearExpiredSession({
+        dispatch: () => store.dispatch(clearAuthSession()),
+      });
       throw { message: "Invalid refresh token response.", status: response.status, details: parsed } as ApiError;
     }
 
     const newAccessToken = extractStringValue(parsed, ACCESS_TOKEN_KEYS);
     if (!newAccessToken) {
-      clearAuthStorage();
-      store.dispatch(clearAuthSession());
+      clearExpiredSession({
+        dispatch: () => store.dispatch(clearAuthSession()),
+      });
       throw { message: "Refresh response did not include an access token.", status: response.status, details: parsed } as ApiError;
     }
 
@@ -196,7 +202,9 @@ export async function apiFetch<T>(opts: {
     if (apiError?.status === 401 || apiError?.status === 403) {
       const refreshToken = readRefreshToken();
       if (!refreshToken) {
-        store.dispatch(clearAuthSession());
+        clearExpiredSession({
+          dispatch: () => store.dispatch(clearAuthSession()),
+        });
         throw apiError;
       }
 
@@ -204,6 +212,9 @@ export async function apiFetch<T>(opts: {
         const newToken = await refreshAccessToken();
         return await performRequest<T>({ path, method, body, query, accessToken: newToken, signal });
       } catch {
+        clearExpiredSession({
+          dispatch: () => store.dispatch(clearAuthSession()),
+        });
         throw apiError;
       }
     }

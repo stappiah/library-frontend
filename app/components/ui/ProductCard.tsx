@@ -36,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.title}
           </h3>
           <span className="font-bold text-xl text-zinc-900 dark:text-white">
-            ${product.price}
+            ₵{product.price}
           </span>
         </div>
         

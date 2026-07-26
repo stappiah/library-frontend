@@ -3,9 +3,10 @@ export function cn(...inputs: Array<string | false | null | undefined>) {
 }
 
 export function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-GH", {
     style: "currency",
-    currency: "USD",
+    currency: "GHS",
+    currencyDisplay: "narrowSymbol",
   }).format(value);
 }
 

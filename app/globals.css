@@ -44,3 +44,30 @@ body {
   border-radius: 9999px;
   background: rgba(148, 163, 184, 0.4);
 }
+
+/* My Library - Screenshot & Recording Prevention */
+.my-library-content {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.my-library-content img,
+.my-library-content video {
+  pointer-events: none;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent dragging of content */
+.my-library-content * {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* Blur effect when print screen is detected (basic protection) */
+@media print {
+  .my-library-content {
+    display: none !important;
+  }
+}

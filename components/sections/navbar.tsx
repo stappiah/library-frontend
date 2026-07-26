@@ -7,17 +7,20 @@ import { Menu, Moon, Search, ShoppingBag, Sun, X } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Button } from "@/components/ui/button";
 
+import { useAppSelector } from "@/store/hooks";
+import { selectAuth } from "@/store/slices/authSlice";
+
 const navLinks = [
-  { href: "/shop", label: "Shop" },
-  { href: "/categories", label: "Categories" },
-  { href: "/vendors", label: "Vendors" },
-  { href: "/vendor", label: "Vendor portal" },
+  { href: "/shop", label: "Shop E-books" },
+  { href: "/categories", label: "Faculties" },
   { href: "/wishlist", label: "Wishlist" },
-  { href: "/account", label: "Account" },
+  { href: "/account", label: "Account / My Library" },
 ];
 
 export function Navbar() {
   const { cart, openCart } = useAppStore();
+  const auth = useAppSelector(selectAuth);
+  const isLecturer = auth.user?.role === "vendor" || auth.user?.role === "admin";
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
 
@@ -38,13 +41,19 @@ export function Navbar() {
     document.documentElement.style.colorScheme = nextTheme === "dark" ? "dark" : "light";
   };
 
-  const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+  const cartCount = useMemo(() => {
+    if (!Array.isArray(cart)) {
+      return 0;
+    }
+
+    return cart.reduce((sum, item) => sum + (item?.quantity ?? 0), 0);
+  }, [cart]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/85 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/85">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="text-lg font-black tracking-tight text-zinc-950 dark:text-white">
-          Luma Atelier
+          Ktu e bookshop
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-600 dark:text-zinc-300 md:flex">
@@ -53,6 +62,11 @@ export function Navbar() {
               {item.label}
             </Link>
           ))}
+          {isLecturer && (
+            <Link href="/vendors" className="font-semibold text-blue-600 transition hover:text-blue-800">
+              Lecturer Portal
+            </Link>
+          )}
         </nav>
 
         <div className="hidden flex-1 items-center justify-center px-6 md:flex">
@@ -100,6 +114,15 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            {isLecturer && (
+              <Link
+                href="/vendors"
+                className="block rounded-2xl px-3 py-2 text-sm font-semibold text-blue-600"
+                onClick={() => setOpen(false)}
+              >
+                Lecturer Portal
+              </Link>
+            )}
           </div>
         </motion.div>
       )}

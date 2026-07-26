@@ -9,40 +9,32 @@ import { useAppStore } from "@/store/app-store";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken, selectIsAuthenticated } from "@/store/slices/authSlice";
 import { createOrder } from "@/lib/services/catalog-service";
+import { MobileMoneyModal } from "@/components/sections/mobile-money-modal";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, closeCart, clearCart } = useAppStore();
   const accessToken = useAppSelector(selectAccessToken);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [promo, setPromo] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [showMomoModal, setShowMomoModal] = useState(false);
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
-    streetAddress: "",
-    city: "",
-    postalCode: "",
-    phone: "",
-    cardNumber: "",
-    expiry: "",
-    cvc: "",
+    mobileMoneyNumber: "",
   });
 
-  const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const discount = promo.toLowerCase() === "luma10" ? subtotal * 0.1 : 0;
-  const total = subtotal - discount;
+  const safeCart = Array.isArray(cart) ? cart : [];
+  const subtotal = safeCart.reduce((sum, item) => sum + (item?.product?.price ?? 0) * (item?.quantity ?? 0), 0);
+  const total = subtotal;
 
   const summary = useMemo(
     () => [
       { label: "Subtotal", value: formatCurrency(subtotal) },
-      { label: "Shipping", value: "Free" },
-      { label: "Discount", value: discount ? `- ${formatCurrency(discount)}` : "-" },
-      { label: "Estimated total", value: formatCurrency(total) },
+      { label: "Total", value: formatCurrency(total) },
     ],
-    [discount, subtotal, total]
+    [subtotal, total]
   );
 
   const handleChange = (field: keyof typeof form, value: string) => {
@@ -59,37 +51,43 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (cart.length === 0) {
+    if (safeCart.length === 0) {
       setMessage("Your cart is empty. Add items before checking out.");
       setStatus("error");
       return;
     }
 
-    if (!form.streetAddress || !form.city || !form.postalCode || !form.phone) {
-      setMessage("Please complete all shipping fields before placing your order.");
+    if (!form.name || !form.email || !form.mobileMoneyNumber) {
+      setMessage("Please fill in all required fields.");
       setStatus("error");
       return;
     }
 
+    // Show Mobile Money authorization popup
+    setShowMomoModal(true);
+  };
+
+  const handleMomoConfirm = async () => {
+    setShowMomoModal(false);
     setStatus("loading");
 
     try {
-      await createOrder(accessToken, {
-        shipping_address: `${form.streetAddress}, ${form.city}, ${form.postalCode}`,
-        phone: form.phone,
-        email: form.email || undefined,
-        billing_address: `${form.streetAddress}, ${form.city}, ${form.postalCode}`,
-        items: cart.map((item) => ({ book_id: item.product.id, quantity: item.quantity })),
-        notes: `Order placed via frontend checkout. Promo: ${promo}`,
+      await createOrder(accessToken!, {
+        shipping_address: "E-book (digital delivery)",
+        phone: form.mobileMoneyNumber,
+        email: form.email,
+        billing_address: "E-book (digital delivery)",
+        items: safeCart.map((item) => ({ book_id: item.product.id, quantity: item.quantity })),
+        notes: `Mobile Money: ${form.mobileMoneyNumber}. Name: ${form.name}. E-book order.`,
       });
 
       setStatus("success");
-      setMessage("Order placed successfully! Redirecting to your account page...");
+      setMessage("Payment successful! Your e-book is ready to download. Redirecting to your library...");
       closeCart();
       clearCart();
-      setTimeout(() => router.push("/account"), 1000);
+      setTimeout(() => router.push("/account"), 1500);
     } catch (error) {
-      const errorMessage = typeof error === "object" && error !== null && "message" in error ? (error as any).message : "Unable to place order.";
+      const errorMessage = typeof error === "object" && error !== null && "message" in error ? (error as any).message : "Unable to process payment.";
       setStatus("error");
       setMessage(String(errorMessage));
     }
@@ -99,42 +97,42 @@ export default function CheckoutPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Checkout</p>
-        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Complete your premium purchase</h1>
+        <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Complete your e-book purchase</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-[30px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input placeholder="First name" value={form.firstName} onChange={(event) => handleChange('firstName', event.target.value)} />
-            <Input placeholder="Last name" value={form.lastName} onChange={(event) => handleChange('lastName', event.target.value)} />
-            <Input placeholder="Email address" value={form.email} onChange={(event) => handleChange('email', event.target.value)} className="sm:col-span-2" />
-            <Input placeholder="Street address" value={form.streetAddress} onChange={(event) => handleChange('streetAddress', event.target.value)} className="sm:col-span-2" />
-            <Input placeholder="City" value={form.city} onChange={(event) => handleChange('city', event.target.value)} />
-            <Input placeholder="Postal code" value={form.postalCode} onChange={(event) => handleChange('postalCode', event.target.value)} />
-            <Input placeholder="Phone" value={form.phone} onChange={(event) => handleChange('phone', event.target.value)} className="sm:col-span-2" />
-            <Input placeholder="Card number" value={form.cardNumber} onChange={(event) => handleChange('cardNumber', event.target.value)} className="sm:col-span-2" />
-            <Input placeholder="MM/YY" value={form.expiry} onChange={(event) => handleChange('expiry', event.target.value)} />
-            <Input placeholder="CVC" value={form.cvc} onChange={(event) => handleChange('cvc', event.target.value)} />
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Payment Details</p>
+          <p className="mt-1 text-xs text-zinc-400">Pay securely with Mobile Money (MoMo)</p>
+          <div className="mt-4 grid gap-4">
+            <Input 
+              placeholder="Full name" 
+              value={form.name} 
+              onChange={(event) => handleChange('name', event.target.value)} 
+              required
+            />
+            <Input 
+              placeholder="Email address" 
+              type="email" 
+              value={form.email} 
+              onChange={(event) => handleChange('email', event.target.value)} 
+              required
+            />
+            <Input 
+              placeholder="Mobile Money number (e.g. 054XXXXXXX)" 
+              value={form.mobileMoneyNumber} 
+              onChange={(event) => handleChange('mobileMoneyNumber', event.target.value)} 
+              required
+            />
           </div>
 
-          <div className="mt-6 rounded-[24px] border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Input
-                value={promo}
-                onChange={(event) => setPromo(event.target.value)}
-                placeholder="Promo code"
-              />
-              <Button variant="secondary" type="button" onClick={() => setMessage(promo ? `Promo code ${promo} applied.` : "Enter a promo code.")}>Apply</Button>
-            </div>
-            <p className="mt-3 text-sm text-zinc-500">Try “luma10” for 10% off.</p>
-          </div>
           {message ? (
             <p className={`mt-4 text-sm ${status === 'error' ? 'text-rose-500' : 'text-emerald-600'}`}>{message}</p>
           ) : null}
         </div>
 
         <div className="rounded-[30px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Summary</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Order Summary</p>
           <div className="mt-4 space-y-3 text-sm">
             {summary.map((item) => (
               <div key={item.label} className="flex items-center justify-between">
@@ -144,18 +142,39 @@ export default function CheckoutPage() {
             ))}
           </div>
 
+          {/* Cart items summary */}
+          <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Items</p>
+            {safeCart.map((item) => (
+              <div key={item.product.id} className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-zinc-600 dark:text-zinc-300">{item.product.title} × {item.quantity}</span>
+                <span className="font-semibold">{formatCurrency(item.product.price * item.quantity)}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="mt-6 rounded-[24px] bg-zinc-50 p-4 dark:bg-zinc-950">
-            <p className="text-sm text-zinc-500">Secure checkout</p>
+            <p className="text-sm text-zinc-500">Mobile Money Payment</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-              Our checkout experience is optimized for premium storefronts with fast payment, clear totals, and guest-friendly flows.
+              You will receive a Mobile Money authorization prompt on your phone after placing the order. Enter your MoMo PIN to complete payment.
             </p>
           </div>
 
           <Button className="mt-5 w-full" type="submit" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Placing order...' : 'Place order'}
+            {status === 'loading' ? 'Processing...' : `Pay ${formatCurrency(total)} with MoMo`}
           </Button>
         </div>
       </form>
+
+      {showMomoModal && (
+        <MobileMoneyModal
+          amount={total}
+          phoneNumber={form.mobileMoneyNumber}
+          onConfirm={handleMomoConfirm}
+          onCancel={() => setShowMomoModal(false)}
+        />
+      )}
     </div>
   );
 }
+

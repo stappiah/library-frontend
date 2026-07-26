@@ -25,11 +25,11 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Featured collection</p>
-            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">A carefully edited selection for the season</h2>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Featured e-books</p>
+            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Recommended reading materials for tertiary students</h2>
           </div>
           <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
-            View all products
+            Browse all e-books
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -42,14 +42,14 @@ export default async function Home() {
         <div className="rounded-[32px] border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Why shoppers stay</p>
-              <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Designed to feel premium from first click to final delivery.</h2>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Why students choose us</p>
+              <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Quality education resources at your fingertips.</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               {[
-                { label: "Premium materials", icon: Sparkles },
-                { label: "Transparent shipping", icon: Globe2 },
-                { label: "Trusted checkout", icon: ShieldCheck },
+                { label: "Expert-reviewed books", icon: Sparkles },
+                { label: "Instant e-book delivery", icon: Globe2 },
+                { label: "Mobile Money checkout", icon: ShieldCheck },
               ].map((item) => (
                 <div key={item.label} className="rounded-[24px] bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
                   <item.icon className="h-5 w-5 text-zinc-950 dark:text-white" />
@@ -64,8 +64,8 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Trending categories</p>
-            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Browse the most-loved collections</h2>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Faculties</p>
+            <h2 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">Browse e-books by faculty</h2>
           </div>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
