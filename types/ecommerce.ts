@@ -186,6 +186,7 @@ export interface Order {
 
   userId?: string;
   orderNumber: string;
+  paymentStatus?: string;
   createdAt?: string;
   updatedAt?: string;
 
