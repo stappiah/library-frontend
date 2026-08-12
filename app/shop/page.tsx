@@ -44,10 +44,22 @@ export default function ShopPage() {
 
     return productsData
       .filter((product) => {
+        const vendorName = product.vendor?.name?.toLowerCase() ?? "";
+        const categoryName = product.category?.name?.toLowerCase() ?? "";
+        const facultyName = product.faculty?.name?.toLowerCase() ?? "";
         const matchesSearch =
-          product.title.toLowerCase().includes(query) || product.brand.toLowerCase().includes(query);
-        const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-        const matchesBrand = selectedBrand === "All" || product.brand === selectedBrand;
+          product.title.toLowerCase().includes(query) ||
+          product.author.toLowerCase().includes(query) ||
+          vendorName.includes(query) ||
+          categoryName.includes(query) ||
+          facultyName.includes(query);
+        const matchesCategory =
+          selectedCategory === "all" ||
+          product.category?.slug === selectedCategory ||
+          product.category?.name.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+          product.faculty?.slug === selectedCategory ||
+          product.faculty?.name.toLowerCase().includes(selectedCategory.toLowerCase());
+        const matchesBrand = selectedBrand === "All" || vendorName === selectedBrand.toLowerCase();
         const matchesPrice =
           priceRange === "All" ||
           (priceRange === "Under ₵100" && product.price < 100) ||
@@ -64,7 +76,7 @@ export default function ShopPage() {
       });
   }, [priceRange, productsData, search, selectedBrand, selectedCategory, sort]);
 
-  const brands = ["All", ...new Set(productsData.map((product) => product.brand))];
+  const brands = ["All", ...new Set(productsData.map((product) => product.vendor?.name ?? "Independent publisher"))];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

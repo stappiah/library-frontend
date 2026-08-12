@@ -42,7 +42,7 @@ export default function CartPage() {
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{item.product.brand}</p>
+                      <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{item.product.vendor?.name ?? "Independent publisher"}</p>
                       <h2 className="mt-2 text-lg font-semibold text-zinc-950 dark:text-white">{item.product.title}</h2>
                     </div>
                     <button type="button" onClick={() => removeFromCart(item.product.id)}>

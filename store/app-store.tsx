@@ -8,6 +8,8 @@ import { hydrateAuth } from "./slices/authSlice";
 import { fetchCatalog } from "./slices/catalogSlice";
 import type { Product } from "@/types/ecommerce";
 
+type ProductId = Product["id"];
+
 export interface CartEntry {
   product: Product;
   quantity: number;
@@ -15,12 +17,12 @@ export interface CartEntry {
 
 interface AppStoreContextValue {
   cart: CartEntry[];
-  wishlist: number[];
+  wishlist: ProductId[];
   isCartOpen: boolean;
   addToCart: (product: Product, quantity?: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
-  removeFromCart: (productId: number) => void;
-  toggleWishlist: (productId: number) => void;
+  updateQuantity: (productId: ProductId, quantity: number) => void;
+  removeFromCart: (productId: ProductId) => void;
+  toggleWishlist: (productId: ProductId) => void;
   openCart: () => void;
   closeCart: () => void;
   clearCart: () => void;
@@ -56,15 +58,15 @@ export function useAppStore() {
     dispatch(addCartItem({ product, quantity }));
   }, [dispatch]);
 
-  const updateQuantity = useCallback((productId: number, quantity: number) => {
+  const updateQuantity = useCallback((productId: ProductId, quantity: number) => {
     dispatch(updateCartQuantity({ productId, quantity }));
   }, [dispatch]);
 
-  const removeFromCart = useCallback((productId: number) => {
+  const removeFromCart = useCallback((productId: ProductId) => {
     dispatch(removeCartItem(productId));
   }, [dispatch]);
 
-  const toggleWishlistValue = useCallback((productId: number) => {
+  const toggleWishlistValue = useCallback((productId: ProductId) => {
     dispatch(toggleWishlist(productId));
   }, [dispatch]);
 

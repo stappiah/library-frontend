@@ -1,69 +1,125 @@
-export type ProductSize = "XS" | "S" | "M" | "L" | "XL";
 export type UserRole = "customer" | "vendor" | "admin" | "superadmin";
+
+export type ProductType =
+  | "ebook"
+  | "notes"
+  | "template"
+  | "software"
+  | "course";
+
 export type ProductStatus = "draft" | "published" | "archived";
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
+
+export type VendorStatus = "pending" | "active" | "suspended";
+
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "failed"
+  | "cancelled"
+  | "refunded";
 
 export interface Review {
-  id: string;
-  user: string;
-  avatar: string;
+  id: number | string;
+  user: number | string | null;
+  userName?: string;
   rating: number;
   title: string;
-  body: string;
-  date: string;
+  content?: string;
+  helpfulCount?: number;
+  createdAt?: string;
+  avatar?: string;
+  body?: string;
+  date?: string;
 }
 
 export interface VendorProfile {
-  id: string;
-  userId: string;
+  id: number | string;
+  userId?: number | string;
   name: string;
   slug: string;
   email: string;
-  bio: string;
-  specialties: string[];
+  description: string;
+  logo?: string | null;
+  phone?: string | null;
+  address?: string | null;
   rating: number;
   productsCount: number;
-  status: "pending" | "active" | "suspended";
-  commissionRate?: number;
+  status: VendorStatus;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  bio?: string;
+  specialties?: string[];
   location?: string;
-}
-
-export interface Product {
-  id: number;
-  slug: string;
-  title: string;
-  price: number;
-  compareAtPrice?: number;
-  rating: number;
-  reviewsCount: number;
-  category: string;
-  brand: string;
-  description: string;
-  highlights: string[];
-  images: string[];
-  badge?: string;
-  colors: string[];
-  sizes: ProductSize[];
-  inventory: number;
-  reviews: Review[];
-  careInstructions: string[];
-  vendorId: number;
-  vendorName: string;
-  vendorSlug?: string;
-  status?: ProductStatus;
-  categories?: string[];
-  isbn?: string;
-  format?: "Paperback" | "Hardcover" | "Ebook" | "PDF";
+  commissionRate?: number;
 }
 
 export interface Category {
-  id: string;
+  id: number | string;
   name: string;
   slug: string;
-  icon: string;
   description: string;
-  count: number;
-  parentId?: string;
+  image?: string | null;
+  icon?: string;
+  count?: number;
+}
+
+export interface Faculty {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export interface ProductImage {
+  id: number;
+  image: string;
+  altText?: string;
+}
+
+export interface Product {
+  id: number | string;
+  slug: string;
+
+  title: string;
+  author: string;
+  description: string;
+
+  price: number;
+  discountPrice?: number | null;
+  discountPercentage: number;
+
+  productType: ProductType;
+
+  category?: Category | null;
+  faculty?: Faculty | null;
+  vendor?: VendorProfile | null;
+
+  isbn?: string | null;
+  publisher?: string | null;
+  publicationYear?: number | null;
+  pages?: number | null;
+  language: string;
+
+  image?: string | null;
+  imageUrl?: string | null;
+  images: string[];
+  galleryImages: ProductImage[];
+
+  rating: number;
+  reviewsCount: number;
+  reviews: Review[];
+
+  isFeatured: boolean;
+
+  fileName?: string | null;
+  fileSize?: number | null;
+
+  downloadLimit: number;
+  downloadExpiryDays: number;
+
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Testimonial {
@@ -81,26 +137,16 @@ export interface OrderSummary {
   value: number;
 }
 
-export interface Address {
-  id?: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  addressType?: string;
-}
-
 export interface OrderItem {
-  id: string;
+  id: number;
   productId: number;
   title: string;
   quantity: number;
   unitPrice: number;
+  discountPrice?: number | null;
   subtotal: number;
-  vendorId: number;
-  vendorName: string;
+  vendorId?: number;
+  vendorName?: string;
 }
 
 export interface Payment {
@@ -134,14 +180,42 @@ export interface UserProfile {
 export interface Order {
   id: string;
   date: string;
-  status: OrderStatus | "Processing" | "Delivered" | "Shipped" | "Cancelled";
+  status: OrderStatus;
   total: number;
   items: number;
+
   userId?: string;
-  vendorId?: number;
-  orderNumber?: string;
+  orderNumber: string;
   createdAt?: string;
+  updatedAt?: string;
+
   itemsDetail?: OrderItem[];
-  shippingAddress?: Address;
-  paymentStatus?: string;
+
+  email?: string;
+  notes?: string;
+}
+
+export interface Download {
+  id: number;
+  book: Product;
+  orderNumber: string;
+  downloads: number;
+  maxDownloads: number;
+  remainingDownloads: number | null;
+  expiresAt?: string | null;
+  isExpired: boolean;
+  isExhausted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Address {
+  id?: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  addressType?: string;
 }

@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Product } from "@/types/ecommerce";
 
+type ProductId = Product["id"];
+
 export interface CartEntry {
   product: Product;
   quantity: number;
@@ -8,7 +10,7 @@ export interface CartEntry {
 
 interface CartState {
   items: CartEntry[];
-  wishlist: number[];
+  wishlist: ProductId[];
   isOpen: boolean;
 }
 
@@ -46,7 +48,7 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     hydrateCart: (state) => {
-      const saved = readStorage<{ items?: CartEntry[]; wishlist?: number[] } | null>(STORAGE_KEY, null);
+      const saved = readStorage<{ items?: CartEntry[]; wishlist?: ProductId[] } | null>(STORAGE_KEY, null);
       if (saved) {
         state.items = saved.items ?? state.items;
         state.wishlist = saved.wishlist ?? state.wishlist;
@@ -62,17 +64,17 @@ const cartSlice = createSlice({
       state.isOpen = true;
       writeStorage(STORAGE_KEY, { items: state.items, wishlist: state.wishlist });
     },
-    updateQuantity: (state, action: { payload: { productId: number; quantity: number } }) => {
+    updateQuantity: (state, action: { payload: { productId: ProductId; quantity: number } }) => {
       state.items = state.items
         .map((entry) => (entry.product.id === action.payload.productId ? { ...entry, quantity: action.payload.quantity } : entry))
         .filter((entry) => entry.quantity > 0);
       writeStorage(STORAGE_KEY, { items: state.items, wishlist: state.wishlist });
     },
-    removeFromCart: (state, action: { payload: number }) => {
+    removeFromCart: (state, action: { payload: ProductId }) => {
       state.items = state.items.filter((entry) => entry.product.id !== action.payload);
       writeStorage(STORAGE_KEY, { items: state.items, wishlist: state.wishlist });
     },
-    toggleWishlist: (state, action: { payload: number }) => {
+    toggleWishlist: (state, action: { payload: ProductId }) => {
       state.wishlist = state.wishlist.includes(action.payload)
         ? state.wishlist.filter((id) => id !== action.payload)
         : [...state.wishlist, action.payload];

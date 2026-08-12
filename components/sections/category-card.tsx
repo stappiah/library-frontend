@@ -13,11 +13,11 @@ export function CategoryCard({ category }: { category: Category }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">{category.count} items</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Digital resources</p>
           <h3 className="mt-3 text-xl font-semibold text-zinc-950 dark:text-white">{category.name}</h3>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{category.description}</p>
         </div>
-        <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold dark:bg-zinc-800">{category.icon}</span>
+        <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold dark:bg-zinc-800">📚</span>
       </div>
       <Link
         href={`/categories/${category.slug}`}

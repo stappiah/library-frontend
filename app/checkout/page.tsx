@@ -153,7 +153,7 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-[24px] bg-zinc-50 p-4 dark:bg-zinc-950">
+          <div className="mt-6 rounded-3xl bg-zinc-50 p-4 dark:bg-zinc-950">
             <p className="text-sm text-zinc-500">Mobile Money Payment</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
               You will receive a Mobile Money authorization prompt on your phone after placing the order. Enter your MoMo PIN to complete payment.

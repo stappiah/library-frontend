@@ -29,7 +29,8 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
     })
     .flatMap((o) => o.itemsDetail?.map((item) => item.productId) ?? []);
 
-  const libraryProducts = catalogProducts.filter((p) => purchasedProductIds.includes(p.id));
+  const normalizedPurchasedProductIds = purchasedProductIds.map((id) => String(id));
+  const libraryProducts = catalogProducts.filter((p) => normalizedPurchasedProductIds.includes(String(p.id)));
 
   if (!user) {
     return (
@@ -131,7 +132,7 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
 
           <div className="mt-6 my-library-content">
             {libraryProducts.length === 0 ? (
-              <div className="rounded-[24px] border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
+              <div className="rounded-3xl border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
                 <BookOpen className="mx-auto h-8 w-8 text-zinc-500" />
                 <p className="mt-4 font-semibold">No e-books yet</p>
                 <p className="mt-2 text-sm text-zinc-500">Purchase e-books from the shop and they will appear here.</p>
@@ -141,7 +142,7 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
                 {libraryProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="flex flex-col gap-4 rounded-[24px] border border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-4 rounded-3xl border border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex items-center gap-4">
                       <div className="flex h-16 w-16 items-center justify-center rounded-[18px] bg-blue-50 text-blue-600 dark:bg-blue-950/50">
@@ -149,8 +150,8 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
                       </div>
                       <div>
                         <p className="font-semibold text-zinc-950 dark:text-white">{product.title}</p>
-                        <p className="text-sm text-zinc-500">{product.brand}</p>
-                        <p className="text-xs text-zinc-400">{product.format || "E-book"}</p>
+                        <p className="text-sm text-zinc-500">{product.vendor?.name ?? "Independent publisher"}</p>
+                        <p className="text-xs text-zinc-400">{product.productType}</p>
                       </div>
                     </div>
                     <Button

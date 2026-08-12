@@ -31,7 +31,7 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
-  title: "Ktu e bookshop | Tertiary Education E-Books",
+  title: "KTU E-bookshop | Tertiary Education E-Books",
   description: "Your premier online bookshop for tertiary education e-books in Ghana. Quality reading materials for university students.",
 };
 

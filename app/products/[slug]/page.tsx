@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
-import { Heart, Minus, Plus, Star, Truck } from "lucide-react";
+import { BookOpen, FileText, Heart, Library, Star, Truck } from "lucide-react";
 import { ProductGallery } from "@/components/sections/product-gallery";
 import { ProductGrid } from "@/components/sections/product-grid";
 import { Button } from "@/components/ui/button";
@@ -43,8 +43,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     if (product) {
-      setSelectedColor(product.colors[0] ?? "");
-      setSelectedSize(product.sizes[0] ?? "");
       setQuantity(1);
     }
   }, [product]);
@@ -54,7 +52,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const relatedProducts = useMemo(
     () =>
       product
-        ? catalogProducts.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3)
+        ? catalogProducts.filter((item) => item.id !== product.id && (item.category?.slug === product.category?.slug || item.vendor?.slug === product.vendor?.slug)).slice(0, 3)
         : [],
     [catalogProducts, product]
   );
@@ -93,10 +91,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <div>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
+              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{product.vendor?.name ?? "Independent publisher"}</p>
               <h1 className="mt-3 text-3xl font-bold text-zinc-950 dark:text-white">{product.title}</h1>
             </div>
-            {product.badge && <Badge>{product.badge}</Badge>}
+            <Badge>{product.isFeatured ? "Featured" : product.productType}</Badge>
           </div>
 
           <div className="mt-4 flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-300">
@@ -109,66 +107,42 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </div>
 
           <div className="mt-5 flex items-end gap-3">
-            <p className="text-3xl font-bold text-zinc-950 dark:text-white">{formatCurrency(product.price)}</p>
-            {product.compareAtPrice && (
-              <p className="text-sm text-zinc-500 line-through">{formatCurrency(product.compareAtPrice)}</p>
+            <p className="text-3xl font-bold text-zinc-950 dark:text-white">{formatCurrency(product.discountPrice ?? product.price)}</p>
+            {product.discountPrice != null && (
+              <p className="text-sm text-zinc-500 line-through">{formatCurrency(product.price)}</p>
             )}
           </div>
 
           <p className="mt-5 text-base leading-7 text-zinc-600 dark:text-zinc-300">{product.description}</p>
 
-          <div className="mt-6 space-y-6">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Color</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setSelectedColor(color)}
-                    className={`rounded-full border px-4 py-2 text-sm ${
-                      selectedColor === color
-                        ? "border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950"
-                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200"
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
+                <BookOpen className="h-4 w-4" />
+                Category
               </div>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{product.category?.name ?? "Uncategorized"}</p>
             </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Size</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`rounded-full border px-4 py-2 text-sm ${
-                      selectedSize === size
-                        ? "border-zinc-950 bg-zinc-950 text-white dark:border-white dark:bg-white dark:text-zinc-950"
-                        : "border-zinc-200 text-zinc-700 dark:border-zinc-800 dark:text-zinc-200"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
+                <Library className="h-4 w-4" />
+                Faculty
               </div>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{product.faculty?.name ?? "General"}</p>
             </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">Quantity</p>
-              <div className="mt-3 flex w-fit items-center gap-3 rounded-full border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="w-8 text-center font-semibold">{quantity}</span>
-                <button type="button" onClick={() => setQuantity((value) => value + 1)}>
-                  <Plus className="h-4 w-4" />
-                </button>
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
+                <FileText className="h-4 w-4" />
+                Format
               </div>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{product.productType}</p>
+            </div>
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
+                <Truck className="h-4 w-4" />
+                Downloads
+              </div>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{product.fileName ? `Ready (${product.downloadLimit} max)` : "Preview only"}</p>
             </div>
           </div>
 
@@ -182,7 +156,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             </Button>
           </div>
 
-          <div className="mt-6 rounded-[24px] border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-white">
               <Truck className="h-4 w-4" />
               Free shipping on orders over ₵1,500
@@ -193,16 +167,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-        <div className="flex flex-wrap gap-4">
-          {[
-            { title: "Highlights", content: product.highlights.join(" • ") },
-            { title: "Care", content: product.careInstructions.join(" • ") },
-          ].map((tab) => (
-            <div key={tab.title} className="rounded-[24px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-              <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{tab.title}</p>
-              <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{tab.content}</p>
-            </div>
-          ))}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">About this resource</p>
+            <p className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{product.description}</p>
+          </div>
+          <div className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Publisher details</p>
+            <ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
+              <li><span className="font-semibold text-zinc-950 dark:text-white">Author:</span> {product.author}</li>
+              <li><span className="font-semibold text-zinc-950 dark:text-white">Publisher:</span> {product.publisher ?? "Not listed"}</li>
+              <li><span className="font-semibold text-zinc-950 dark:text-white">ISBN:</span> {product.isbn ?? "Not listed"}</li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -210,7 +187,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Related products</p>
-            <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Pair this with the rest of the edit</h2>
+            <h2 className="mt-3 text-2xl font-bold text-zinc-950 dark:text-white">Discover more from this lecturer and category</h2>
           </div>
         </div>
         <div className="mt-6">

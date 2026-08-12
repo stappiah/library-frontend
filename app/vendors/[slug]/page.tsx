@@ -74,14 +74,14 @@ export default function VendorStorePage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-sm font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200">
-              <Sparkles className="h-4 w-4" /> {store.specialties[0] || "Faculty vendor"}
+              <Sparkles className="h-4 w-4" /> {store.description || "Faculty vendor"}
             </p>
             <h1 className="mt-4 text-4xl font-black tracking-tight text-zinc-950 dark:text-white">{store.name}</h1>
-            <p className="mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-300">{store.bio}</p>
+            <p className="mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-300">{store.description}</p>
           </div>
           <div className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" /> {store.location ?? "Online"}
+              <MapPin className="h-4 w-4" /> {store.address || "Online"}
             </div>
             <div className="mt-2 font-semibold text-zinc-950 dark:text-white">{store.productsCount} products available</div>
           </div>

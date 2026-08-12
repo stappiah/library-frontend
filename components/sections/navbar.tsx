@@ -12,8 +12,9 @@ import { selectAuth } from "@/store/slices/authSlice";
 
 const navLinks = [
   { href: "/shop", label: "Shop E-books" },
-  { href: "/categories", label: "Faculties" },
+  // { href: "/categories", label: "Faculties" },
   { href: "/wishlist", label: "Wishlist" },
+  { href: "/vendors", label: "Lecturers" },
   { href: "/account", label: "Account / My Library" },
 ];
 
@@ -53,7 +54,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-zinc-200/70 bg-white/85 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/85">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="text-lg font-black tracking-tight text-zinc-950 dark:text-white">
-          Ktu e bookshop
+          KTU E-bookshop
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-600 dark:text-zinc-300 md:flex">

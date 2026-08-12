@@ -5,6 +5,7 @@ const footerLinks = [
   { label: "Shop E-books", href: "/shop" },
   { label: "Faculties", href: "/categories" },
   { label: "Wishlist", href: "/wishlist" },
+  { label: "Professor / Vendors", href: "/vendors" },
   { label: "Account", href: "/account" },
 ];
 
@@ -15,7 +16,7 @@ export function Footer() {
         <div>
           <div className="flex items-center gap-2 text-lg font-bold">
             <BookOpen className="h-5 w-5" />
-            Ktu e bookshop
+            KTU E-bookshop
           </div>
           <p className="mt-4 max-w-md text-sm leading-6 text-zinc-600 dark:text-zinc-300">
             Your premier online bookshop for tertiary education e-books in Ghana. Quality reading materials for university students.

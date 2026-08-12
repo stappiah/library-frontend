@@ -54,6 +54,13 @@
 - ✅ `app/checkout/page.tsx` - All card fields removed
 - ✅ `lib/services/catalog-service.ts` - Updated createOrder to not require shipping address
 
+### Step 12: Professor/Vendors Link Visible + Empty Forms + Remove Image URL
+- ✅ `components/sections/navbar.tsx` - Added "Professor / Vendors" link to `/vendors` visible to all users (desktop + mobile)
+- ✅ `components/sections/footer.tsx` - Added "Professor / Vendors" link to Explore section
+- ✅ `app/vendor/page.tsx` - Cleared pre-filled form data (price, inventory, specialty, location) so forms are empty
+- ✅ `app/vendor/page.tsx` - Removed auto-selection of first category
+- ✅ `app/vendor/page.tsx` - Removed "Image URL" field from product upload form
+
 ## Remaining Items
 - ⬜ Test the build to ensure no TypeScript errors
 - ⬜ Verify mobile money modal shows after checkout

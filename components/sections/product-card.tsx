@@ -13,13 +13,16 @@ import type { Product } from "@/types/ecommerce";
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, wishlist } = useAppStore();
   const saved = wishlist.includes(product.id);
+  const badgeText = product.isFeatured ? "Featured" : product.productType;
+  const vendorName = product.vendor?.name ?? "Independent publisher";
+  const priceLabel = product.discountPrice != null ? product.discountPrice : product.price;
 
   return (
     <motion.article
       whileHover={{ y: -6 }}
       className="group overflow-hidden rounded-[30px] border border-zinc-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.28)] dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-4/3 overflow-hidden">
         {product.images[0] ? (
           <Image
             src={product.images[0]}
@@ -31,11 +34,9 @@ export function ProductCard({ product }: { product: Product }) {
         ) : (
           <div className="flex h-full items-center justify-center bg-zinc-100 text-sm text-zinc-500 dark:bg-zinc-900">No image available</div>
         )}
-        {product.badge && (
-          <div className="absolute left-4 top-4">
-            <Badge>{product.badge}</Badge>
-          </div>
-        )}
+        <div className="absolute left-4 top-4">
+          <Badge>{badgeText}</Badge>
+        </div>
         <button
           type="button"
           onClick={() => toggleWishlist(product.id)}
@@ -48,15 +49,20 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">{vendorName}</p>
             <Link href={`/products/${product.slug}`} className="mt-2 block text-lg font-semibold text-zinc-950 dark:text-white">
               {product.title}
             </Link>
           </div>
-          <p className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(product.price)}</p>
+          <p className="text-lg font-bold text-zinc-950 dark:text-white">{formatCurrency(priceLabel)}</p>
         </div>
 
         <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{product.description}</p>
+
+        <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-zinc-500">
+          {product.category?.name ? <span className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800">{product.category.name}</span> : null}
+          {product.faculty?.name ? <span className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800">{product.faculty.name}</span> : null}
+        </div>
 
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-1 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
