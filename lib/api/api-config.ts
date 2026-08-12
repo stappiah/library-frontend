@@ -1,5 +1,5 @@
-// export const DEFAULT_API_BASE = "https://library-backend-a3sj.onrender.com/api";
-export const DEFAULT_API_BASE = "http://127.0.0.1:8000/api";
+export const DEFAULT_API_BASE = "https://library-backend-a3sj.onrender.com/api";
+// export const DEFAULT_API_BASE = "http://127.0.0.1:8000/api";
 
 export function getApiBaseUrl() {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL;
