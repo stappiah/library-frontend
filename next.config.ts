@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "http", hostname: "127.0.0.1", port: "8000", pathname: "/media/**" },
       { protocol: "http", hostname: "localhost", port: "8000", pathname: "/media/**" },
+      { protocol: "https", hostname: "library-backend-a3sj.onrender.com", pathname: "/media/**" },
     ],
   },
   // Prevent stale cache issues by not caching pages aggressively
