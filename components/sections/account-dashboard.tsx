@@ -112,7 +112,6 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
           <th className="pb-4 pr-6 font-medium">Book</th>
           <th className="pb-4 px-4 font-medium">Order</th>
           <th className="pb-4 px-4 font-medium">Price</th>
-          <th className="pb-4 px-4 font-medium">Status</th>
           <th className="pb-4 pl-4 text-right font-medium">Action</th>
         </tr>
       </thead>

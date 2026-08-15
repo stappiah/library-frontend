@@ -140,9 +140,7 @@ export default function VendorsPage() {
     }
   };
 
-  const totalSales = orders
-  .filter((order) => order.status === "paid")
-  .reduce((total, order) => total + order.amount, 0);
+  const totalSales = orders.reduce((total, order) => total + order.amount, 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
@@ -292,15 +290,6 @@ export default function VendorsPage() {
                         <p className="font-semibold text-zinc-900 dark:text-white">
                           GH₵ {order.amount.toFixed(2)}
                         </p>
-                      </td>
-
-                      {/* Payment */}
-                      <td className="px-6 py-5">
-                        <span
-                          className={`text-sm font-semibold capitalize ${paymentStyles[order.paymentStatus]}`}
-                        >
-                          {order.paymentStatus}
-                        </span>
                       </td>
 
                     </tr>
