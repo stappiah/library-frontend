@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import Snackbar from "@mui/material/Snackbar";
+import SnackbarContent from "@mui/material/SnackbarContent";
 
 import {
   createBook,
@@ -50,7 +52,7 @@ interface ProductFormState {
 
   productType: ProductType;
 
-  price: number;
+  price: number | null;
   discountPrice: number | null;
 
   isbn: string;
@@ -80,7 +82,7 @@ const productDefaults: ProductFormState = {
 
   productType: "ebook",
 
-  price: 0,
+  price: null,
   discountPrice: null,
 
   isbn: "",
@@ -122,10 +124,11 @@ export default function VendorPortalPage() {
     { id: number | string; name: string; slug: string }[]
   >([]);
 
-  const [selectedStoreId, setSelectedStoreId] = useState<number | string | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<
+    number | string | null
+  >(null);
 
-  const [storeForm, setStoreForm] =
-    useState<StoreFormState>(storeDefaults);
+  const [storeForm, setStoreForm] = useState<StoreFormState>(storeDefaults);
 
   const [productForm, setProductForm] =
     useState<ProductFormState>(productDefaults);
@@ -140,8 +143,22 @@ export default function VendorPortalPage() {
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCreatingStore, setIsCreatingStore] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSnack, setshowSnack] = useState(false);
 
   const accessToken = useAppSelector(selectAccessToken);
+
+  const showSuccess = (text: string) => {
+    setMessage(null);
+    setError(null);
+    setSuccessMessage(text);
+    setshowSnack(true);
+
+    window.setTimeout(() => {
+      setshowSnack(false);
+      setSuccessMessage(null);
+    }, 5000);
+  };
 
   useEffect(() => {
     setIsLoadingStores(true);
@@ -191,9 +208,7 @@ export default function VendorPortalPage() {
   }, []);
 
   const activeStore = useMemo(
-    () =>
-      stores.find((store) => store.id === selectedStoreId) ??
-      stores[0],
+    () => stores.find((store) => store.id === selectedStoreId) ?? stores[0],
     [selectedStoreId, stores],
   );
 
@@ -275,6 +290,11 @@ export default function VendorPortalPage() {
       return;
     }
 
+    if (productForm.price === null) {
+      setError("Please enter a price.");
+      return;
+    }
+
     if (productForm.price < 0) {
       setError("Price cannot be negative.");
       return;
@@ -284,9 +304,7 @@ export default function VendorPortalPage() {
       productForm.discountPrice !== null &&
       productForm.discountPrice >= productForm.price
     ) {
-      setError(
-        "Discount price must be lower than the original price.",
-      );
+      setError("Discount price must be lower than the original price.");
       return;
     }
 
@@ -305,36 +323,28 @@ export default function VendorPortalPage() {
           product_type: productForm.productType,
 
           price: productForm.price,
-          discount_price:
-            productForm.discountPrice || undefined,
+          discount_price: productForm.discountPrice || undefined,
 
           isbn: productForm.isbn.trim() || undefined,
           publisher: productForm.publisher.trim() || undefined,
 
-          publication_year:
-            productForm.publicationYear || undefined,
+          publication_year: productForm.publicationYear || undefined,
 
           pages: productForm.pages || undefined,
 
           language: productForm.language.trim() || "English",
 
-          imageFile:
-            productForm.imageFile || undefined,
+          imageFile: productForm.imageFile || undefined,
 
-          galleryFiles:
-            productForm.galleryFiles,
+          galleryFiles: productForm.galleryFiles,
 
-          digitalFile:
-            productForm.digitalFile,
+          digitalFile: productForm.digitalFile,
 
-          download_limit:
-            productForm.downloadLimit,
+          download_limit: productForm.downloadLimit,
 
-          download_expiry_days:
-            productForm.downloadExpiryDays,
+          download_expiry_days: productForm.downloadExpiryDays,
 
-          is_featured:
-            productForm.isFeatured,
+          is_featured: productForm.isFeatured,
         },
         accessToken,
       );
@@ -343,9 +353,7 @@ export default function VendorPortalPage() {
 
       setProductForm(productDefaults);
 
-      setMessage(
-        "Your ebook has been published successfully.",
-      );
+      showSuccess("Your ebook has been published successfully.");
     } catch (err) {
       console.error(err);
 
@@ -359,16 +367,32 @@ export default function VendorPortalPage() {
 
   const ownerProducts = useMemo(
     () =>
-      products.filter(
-        (product) =>
-          product.vendor?.slug === activeStore?.slug,
-      ),
+      products.filter((product) => product.vendor?.slug === activeStore?.slug),
     [activeStore?.slug, products],
   );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
       {/* Header */}
+      <Snackbar
+        open={showSnack}
+        autoHideDuration={5000}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        onClose={() => setshowSnack(false)}
+      >
+        <SnackbarContent
+          message={successMessage || "Success!"}
+          sx={{
+            backgroundColor: "#16a34a",
+            color: "#fff",
+            fontWeight: 600,
+            borderRadius: "12px",
+          }}
+        />
+      </Snackbar>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -380,8 +404,8 @@ export default function VendorPortalPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
-            Create your bookstore, upload ebooks, set your pricing,
-            and give customers secure access to their purchases.
+            Create your bookstore, upload ebooks, set your pricing, and give
+            customers secure access to their purchases.
           </p>
         </div>
 
@@ -436,9 +460,7 @@ export default function VendorPortalPage() {
                 <button
                   key={store.id}
                   type="button"
-                  onClick={() =>
-                    setSelectedStoreId(store.id)
-                  }
+                  onClick={() => setSelectedStoreId(store.id)}
                   className={`w-full rounded-2xl border p-4 text-left transition ${
                     selectedStoreId === store.id
                       ? "border-zinc-900 bg-zinc-50 dark:border-white dark:bg-zinc-800"
@@ -449,21 +471,14 @@ export default function VendorPortalPage() {
                     {store.name}
                   </p>
 
-                  <p className="mt-1 text-sm text-zinc-500">
-                    {store.email}
-                  </p>
+                  <p className="mt-1 text-sm text-zinc-500">{store.email}</p>
                 </button>
               ))}
             </div>
           ) : (
-            <form
-              className="mt-6 space-y-4"
-              onSubmit={handleCreateStore}
-            >
+            <form className="mt-6 space-y-4" onSubmit={handleCreateStore}>
               <div>
-                <label className={labelClass}>
-                  Store name
-                </label>
+                <label className={labelClass}>Store name</label>
 
                 <input
                   className={inputClass}
@@ -480,9 +495,7 @@ export default function VendorPortalPage() {
               </div>
 
               <div>
-                <label className={labelClass}>
-                  Store description
-                </label>
+                <label className={labelClass}>Store description</label>
 
                 <textarea
                   className={`${inputClass} min-h-28`}
@@ -499,9 +512,7 @@ export default function VendorPortalPage() {
               </div>
 
               <div>
-                <label className={labelClass}>
-                  Contact email
-                </label>
+                <label className={labelClass}>Contact email</label>
 
                 <input
                   className={inputClass}
@@ -520,9 +531,7 @@ export default function VendorPortalPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>
-                    Phone
-                  </label>
+                  <label className={labelClass}>Phone</label>
 
                   <input
                     className={inputClass}
@@ -538,9 +547,7 @@ export default function VendorPortalPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Address
-                  </label>
+                  <label className={labelClass}>Address</label>
 
                   <input
                     className={inputClass}
@@ -561,9 +568,7 @@ export default function VendorPortalPage() {
                 className="w-full"
                 disabled={isCreatingStore}
               >
-                {isCreatingStore
-                  ? "Creating bookstore..."
-                  : "Create bookstore"}
+                {isCreatingStore ? "Creating bookstore..." : "Create bookstore"}
               </Button>
             </form>
           )}
@@ -587,15 +592,10 @@ export default function VendorPortalPage() {
             </div>
           </div>
 
-          <form
-            className="mt-6 space-y-6"
-            onSubmit={handleAddProduct}
-          >
+          <form className="mt-6 space-y-6" onSubmit={handleAddProduct}>
             {/* Store */}
             <div>
-              <label className={labelClass}>
-                Publish to bookstore
-              </label>
+              <label className={labelClass}>Publish to bookstore</label>
 
               <select
                 className={inputClass}
@@ -613,10 +613,7 @@ export default function VendorPortalPage() {
                 </option>
 
                 {stores.map((store) => (
-                  <option
-                    key={store.id}
-                    value={store.id}
-                  >
+                  <option key={store.id} value={store.id}>
                     {store.name}
                   </option>
                 ))}
@@ -637,9 +634,7 @@ export default function VendorPortalPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className={labelClass}>
-                    Book title
-                  </label>
+                  <label className={labelClass}>Book title</label>
 
                   <input
                     className={inputClass}
@@ -657,9 +652,7 @@ export default function VendorPortalPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>
-                      Author
-                    </label>
+                    <label className={labelClass}>Author</label>
 
                     <input
                       className={inputClass}
@@ -676,9 +669,7 @@ export default function VendorPortalPage() {
                   </div>
 
                   <div>
-                    <label className={labelClass}>
-                      Product type
-                    </label>
+                    <label className={labelClass}>Product type</label>
 
                     <select
                       className={inputClass}
@@ -690,33 +681,21 @@ export default function VendorPortalPage() {
                         }))
                       }
                     >
-                      <option value="ebook">
-                        Ebook
-                      </option>
+                      <option value="ebook">Ebook</option>
 
-                      <option value="notes">
-                        Lecture Notes
-                      </option>
+                      <option value="notes">Lecture Notes</option>
 
-                      <option value="template">
-                        Template
-                      </option>
+                      <option value="template">Template</option>
 
-                      <option value="software">
-                        Software
-                      </option>
+                      <option value="software">Software</option>
 
-                      <option value="course">
-                        Course Material
-                      </option>
+                      <option value="course">Course Material</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Description
-                  </label>
+                  <label className={labelClass}>Description</label>
 
                   <textarea
                     className={`${inputClass} min-h-32`}
@@ -734,9 +713,7 @@ export default function VendorPortalPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>
-                      Category
-                    </label>
+                    <label className={labelClass}>Category</label>
 
                     <select
                       className={inputClass}
@@ -756,10 +733,7 @@ export default function VendorPortalPage() {
                       </option>
 
                       {categories.map((category) => (
-                        <option
-                          key={category.id}
-                          value={category.slug}
-                        >
+                        <option key={category.id} value={category.slug}>
                           {category.name}
                         </option>
                       ))}
@@ -767,9 +741,7 @@ export default function VendorPortalPage() {
                   </div>
 
                   <div>
-                    <label className={labelClass}>
-                      Faculty / Department
-                    </label>
+                    <label className={labelClass}>Faculty / Department</label>
 
                     <select
                       className={inputClass}
@@ -788,10 +760,7 @@ export default function VendorPortalPage() {
                       </option>
 
                       {faculties.map((faculty) => (
-                        <option
-                          key={faculty.id}
-                          value={faculty.slug}
-                        >
+                        <option key={faculty.id} value={faculty.slug}>
                           {faculty.name}
                         </option>
                       ))}
@@ -810,7 +779,7 @@ export default function VendorPortalPage() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
+                {/* <div>
                   <label className={labelClass}>
                     ISBN
                   </label>
@@ -826,12 +795,10 @@ export default function VendorPortalPage() {
                       }))
                     }
                   />
-                </div>
+                </div> */}
 
                 <div>
-                  <label className={labelClass}>
-                    Publisher
-                  </label>
+                  <label className={labelClass}>Publisher</label>
 
                   <input
                     className={inputClass}
@@ -847,9 +814,7 @@ export default function VendorPortalPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Publication year
-                  </label>
+                  <label className={labelClass}>Publication year</label>
 
                   <input
                     className={inputClass}
@@ -857,25 +822,20 @@ export default function VendorPortalPage() {
                     min="1000"
                     max={new Date().getFullYear() + 1}
                     placeholder="2026"
-                    value={
-                      productForm.publicationYear ?? ""
-                    }
+                    value={productForm.publicationYear ?? ""}
                     onChange={(event) =>
                       setProductForm((current) => ({
                         ...current,
-                        publicationYear:
-                          event.target.value
-                            ? Number(event.target.value)
-                            : null,
+                        publicationYear: event.target.value
+                          ? Number(event.target.value)
+                          : null,
                       }))
                     }
                   />
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Number of pages
-                  </label>
+                  <label className={labelClass}>Number of pages</label>
 
                   <input
                     className={inputClass}
@@ -895,9 +855,7 @@ export default function VendorPortalPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Language
-                  </label>
+                  <label className={labelClass}>Language</label>
 
                   <input
                     className={inputClass}
@@ -928,8 +886,8 @@ export default function VendorPortalPage() {
                   </h3>
 
                   <p className="mt-1 text-sm text-zinc-500">
-                    Upload the actual digital book customers will
-                    download after purchasing.
+                    Upload the actual digital book customers will download after
+                    purchasing.
                   </p>
                 </div>
               </div>
@@ -939,8 +897,7 @@ export default function VendorPortalPage() {
                 type="file"
                 accept=".pdf,.epub,.mobi,.azw,.azw3"
                 onChange={(event) => {
-                  const file =
-                    event.target.files?.[0] ?? null;
+                  const file = event.target.files?.[0] ?? null;
 
                   setProductForm((current) => ({
                     ...current,
@@ -952,15 +909,9 @@ export default function VendorPortalPage() {
 
               {productForm.digitalFile && (
                 <div className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                  <strong>Selected:</strong>{" "}
-                  {productForm.digitalFile.name}
+                  <strong>Selected:</strong> {productForm.digitalFile.name}
                   {" · "}
-                  {(
-                    productForm.digitalFile.size /
-                    1024 /
-                    1024
-                  ).toFixed(2)}{" "}
-                  MB
+                  {(productForm.digitalFile.size / 1024 / 1024).toFixed(2)} MB
                 </div>
               )}
 
@@ -986,17 +937,14 @@ export default function VendorPortalPage() {
               </div>
 
               <div>
-                <label className={labelClass}>
-                  Book cover
-                </label>
+                <label className={labelClass}>Book cover</label>
 
                 <input
                   className={inputClass}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={(event) => {
-                    const file =
-                      event.target.files?.[0] ?? null;
+                    const file = event.target.files?.[0] ?? null;
 
                     setProductForm((current) => ({
                       ...current,
@@ -1007,9 +955,7 @@ export default function VendorPortalPage() {
               </div>
 
               <div className="mt-4">
-                <label className={labelClass}>
-                  Additional images
-                </label>
+                <label className={labelClass}>Additional images</label>
 
                 <input
                   className={inputClass}
@@ -1040,9 +986,7 @@ export default function VendorPortalPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>
-                    Original price
-                  </label>
+                  <label className={labelClass}>Original price</label>
 
                   <input
                     className={inputClass}
@@ -1050,7 +994,7 @@ export default function VendorPortalPage() {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    value={productForm.price}
+                    value={productForm.price ?? ""}
                     onChange={(event) =>
                       setProductForm((current) => ({
                         ...current,
@@ -1062,9 +1006,7 @@ export default function VendorPortalPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Discount price
-                  </label>
+                  <label className={labelClass}>Discount price</label>
 
                   <input
                     className={inputClass}
@@ -1072,16 +1014,13 @@ export default function VendorPortalPage() {
                     min="0"
                     step="0.01"
                     placeholder="Optional"
-                    value={
-                      productForm.discountPrice ?? ""
-                    }
+                    value={productForm.discountPrice ?? ""}
                     onChange={(event) =>
                       setProductForm((current) => ({
                         ...current,
-                        discountPrice:
-                          event.target.value
-                            ? Number(event.target.value)
-                            : null,
+                        discountPrice: event.target.value
+                          ? Number(event.target.value)
+                          : null,
                       }))
                     }
                   />
@@ -1103,9 +1042,7 @@ export default function VendorPortalPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className={labelClass}>
-                    Maximum downloads
-                  </label>
+                  <label className={labelClass}>Maximum downloads</label>
 
                   <input
                     className={inputClass}
@@ -1116,9 +1053,7 @@ export default function VendorPortalPage() {
                     onChange={(event) =>
                       setProductForm((current) => ({
                         ...current,
-                        downloadLimit: Number(
-                          event.target.value,
-                        ),
+                        downloadLimit: Number(event.target.value),
                       }))
                     }
                   />
@@ -1129,24 +1064,18 @@ export default function VendorPortalPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>
-                    Download expiry (days)
-                  </label>
+                  <label className={labelClass}>Download expiry (days)</label>
 
                   <input
                     className={inputClass}
                     type="number"
                     min="1"
                     step="1"
-                    value={
-                      productForm.downloadExpiryDays
-                    }
+                    value={productForm.downloadExpiryDays}
                     onChange={(event) =>
                       setProductForm((current) => ({
                         ...current,
-                        downloadExpiryDays: Number(
-                          event.target.value,
-                        ),
+                        downloadExpiryDays: Number(event.target.value),
                       }))
                     }
                   />
@@ -1176,16 +1105,12 @@ export default function VendorPortalPage() {
               type="submit"
               className="w-full"
               disabled={
-                isPublishing ||
-                !activeStore ||
-                !productForm.digitalFile
+                isPublishing || !activeStore || !productForm.digitalFile
               }
             >
               <UploadCloud className="mr-2 h-4 w-4" />
 
-              {isPublishing
-                ? "Publishing ebook..."
-                : "Publish ebook"}
+              {isPublishing ? "Publishing ebook..." : "Publish ebook"}
             </Button>
           </form>
         </div>
@@ -1254,7 +1179,9 @@ export default function VendorPortalPage() {
 
                 <div className="mt-4 flex items-center justify-between text-sm text-zinc-500 dark:text-zinc-400">
                   <span>
-                    {product.discountPrice != null ? `$${product.discountPrice}` : `$${product.price}`}
+                    {product.discountPrice != null
+                      ? `$${product.discountPrice}`
+                      : `$${product.price}`}
                   </span>
 
                   <span>

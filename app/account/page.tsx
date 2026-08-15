@@ -4,27 +4,39 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken, selectIsAuthenticated } from "@/store/slices/authSlice";
-import { getOrders } from "@/lib/services/catalog-service";
+import { getOrders, getUserOrders } from "@/lib/services/catalog-service";
 import { AccountDashboard } from "@/components/sections/account-dashboard";
-import type { Order } from "@/types/ecommerce";
+import type { Order, UserOrderList } from "@/types/ecommerce";
 import { Button } from "@/components/ui/button";
 
 export default function AccountPage() {
   const accessToken = useAppSelector(selectAccessToken);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<UserOrderList[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!accessToken) {
-      setOrders([]);
-      setLoading(false);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!accessToken) {
+  //     setOrders([]);
+  //     setLoading(false);
+  //     return;
+  //   }
 
+  //   setLoading(true);
+  //   getOrders(accessToken)
+  //     .then(setOrders)
+  //     .catch(() => setOrders([]))
+  //     .finally(() => setLoading(false));
+  // }, [accessToken]);
+
+  useEffect(() => {
     setLoading(true);
-    getOrders(accessToken)
-      .then(setOrders)
+
+    getUserOrders()
+      .then((res) => {
+        console.log("user ", res);
+        setOrders(res);
+      })
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, [accessToken]);

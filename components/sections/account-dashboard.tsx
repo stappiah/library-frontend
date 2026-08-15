@@ -6,13 +6,15 @@ import { useAppSelector } from "@/store/hooks";
 import { selectAuth } from "@/store/slices/authSlice";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import type { Order } from "@/types/ecommerce";
+import type { UserOrderList } from "@/types/ecommerce";
 import { BookOpen, Download, Library } from "lucide-react";
+import { selectAccessToken } from "@/store/slices/authSlice";
+import { downloadProduct } from "@/lib/services/catalog-service";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 
 interface AccountDashboardProps {
-  orders: Order[];
+  orders: UserOrderList[];
 }
 
 export function AccountDashboard({ orders }: AccountDashboardProps) {
@@ -24,10 +26,10 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
   // Get purchased products from orders
   const purchasedProductIds = orders
     .filter((o) => {
-      const s = o.status.toLowerCase();
-      return s === "delivered" || s === "processing" || s === "paid";
+      const s = (o.status || "").toLowerCase();
+      return s === "delivered" || s === "processing" || s === "paid" || s === "completed";
     })
-    .flatMap((o) => o.itemsDetail?.map((item) => item.productId) ?? []);
+    .flatMap((o) => o.items?.map((item) => item.productId) ?? []);
 
   const normalizedPurchasedProductIds = purchasedProductIds.map((id) => String(id));
   const libraryProducts = catalogProducts.filter((p) => normalizedPurchasedProductIds.includes(String(p.id)));
@@ -103,23 +105,117 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
             </div>
           </div>
 
-          <div className="rounded-[30px] border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">Recent orders</p>
-            <div className="mt-4 space-y-3">
-              {orders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-3xl bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
-                  <div>
-                    <p className="font-semibold">{order.id}</p>
-                    <p className="text-sm text-zinc-500">{order.date}</p>
+<div className="mt-6 overflow-x-auto">
+    <table className="w-full min-w-[850px] text-left">
+      <thead>
+        <tr className="border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 dark:border-zinc-800">
+          <th className="pb-4 pr-6 font-medium">Book</th>
+          <th className="pb-4 px-4 font-medium">Order</th>
+          <th className="pb-4 px-4 font-medium">Price</th>
+          <th className="pb-4 px-4 font-medium">Status</th>
+          <th className="pb-4 pl-4 text-right font-medium">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {orders.map((order) =>
+          order.items.map((item) => {
+            const book = item.product ?? { title: "", author: "", image: null, imageUrl: null, productType: "ebook" } as any;
+
+            return (
+              <tr
+                key={`${order.id}-${item.id}`}
+                className="border-b border-zinc-100 last:border-0 dark:border-zinc-800"
+              >
+                {/* Book */}
+                <td className="py-5 pr-6">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={book.image_url || book.image}
+                      alt={book.title}
+                      className="h-16 w-12 rounded-lg object-cover shadow-sm"
+                    />
+
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-zinc-900 dark:text-white">
+                        {book.title}
+                      </p>
+
+                      <p className="mt-1 text-sm text-zinc-500">
+                        by {book.author}
+                      </p>
+
+                      <p className="mt-1 text-xs text-zinc-400">
+                        {book.product_type === "ebook"
+                          ? "E-book"
+                          : "Digital Notes"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold capitalize">{order.status}</p>
-                    <p className="text-sm text-zinc-500">{order.items} items</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                </td>
+
+                {/* Order */}
+                <td className="px-4 py-5">
+                  <p className="font-medium text-zinc-900 dark:text-white">
+                    {order.orderNumber}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }) : ""}
+                  </p>
+                </td>
+
+                {/* Price */}
+                <td className="px-4 py-5">
+                  <p className="font-semibold text-zinc-900 dark:text-white">
+                    GH₵ {Number(item.subtotal ?? 0).toFixed(2)}
+                  </p>
+
+                  {item.quantity > 1 && (
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Qty: {item.quantity}
+                    </p>
+                  )}
+                </td>
+
+                {/* Status */}
+                <td className="px-4 py-5">
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                      order.status === "paid"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                        : order.status === "pending"
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                        : "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400"
+                    }`}
+                  >
+                    <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+                    {order.status}
+                  </span>
+                </td>
+
+                {/* Download */}
+                <td className="py-5 pl-4 text-right">
+                  {order.status === "paid" && (book.fileName || (book as any).digital_file) ? (
+                    <DownloadButton
+                      slug={(book as any).slug ?? (book as any).id}
+                      fileName={(book as any).fileName}
+                    />
+                  ) : (
+                    <span className="text-sm text-zinc-400">Not available</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })
+        )}
+      </tbody>
+    </table>
+  </div>
+
         </div>
       ) : (
         /* My Library Tab */
@@ -154,19 +250,7 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
                         <p className="text-xs text-zinc-400">{product.productType}</p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        // Trigger download of the e-book
-                        const link = document.createElement("a");
-                        link.href = product.images[0] || "#";
-                        link.download = `${product.slug}.pdf`;
-                        link.click();
-                      }}
-                    >
-                      <Download className="mr-1 h-4 w-4" />
-                      Download
-                    </Button>
+                    <DownloadButton slug={product.slug ?? product.id} fileName={(product as any).fileName} />
                   </div>
                 ))}
               </div>
@@ -175,5 +259,132 @@ export function AccountDashboard({ orders }: AccountDashboardProps) {
         </div>
       )}
     </div>
+  );
+}
+
+function DownloadButton({
+  slug,
+  fileName,
+}: {
+  slug: string | number;
+  fileName?: string | null;
+}) {
+  const accessToken = useAppSelector(selectAccessToken);
+  const [busy, setBusy] = useState(false);
+
+  async function handleDownload() {
+    if (!slug) {
+      alert("This product does not have a valid download link.");
+      return;
+    }
+
+    if (!accessToken) {
+      alert("Please sign in again before downloading.");
+      return;
+    }
+
+    setBusy(true);
+
+    try {
+      const apiBaseUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+      const downloadUrl =
+        `${apiBaseUrl}/api/v1/books/${encodeURIComponent(String(slug))}/download/`;
+
+      const response = await fetch(downloadUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        let message = "Download failed. Please try again.";
+
+        try {
+          const data = await response.json();
+
+          message =
+            data?.detail ||
+            data?.error ||
+            message;
+        } catch {
+          // Response wasn't JSON.
+        }
+
+        if (response.status === 401) {
+          message = "Your session has expired. Please sign in again.";
+        } else if (response.status === 403) {
+          message =
+            message ||
+            "You are not allowed to download this product.";
+        } else if (response.status === 404) {
+          message = "The digital file could not be found.";
+        }
+
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+
+      if (!blob || blob.size === 0) {
+        throw new Error("The downloaded file is empty.");
+      }
+
+      /*
+       * Try to get the filename from Django's
+       * Content-Disposition header.
+       */
+      const contentDisposition =
+        response.headers.get("Content-Disposition");
+
+      let downloadName = fileName || `${String(slug)}.pdf`;
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(
+          /filename="?([^"]+)"?/i
+        );
+
+        if (match?.[1]) {
+          downloadName = match[1];
+        }
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = downloadName;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Download failed. Please try again."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Button
+      type="button"
+      onClick={handleDownload}
+      disabled={busy || !accessToken}
+      className="inline-flex items-center gap-2"
+    >
+      <Download className="h-4 w-4" />
+
+      {busy ? "Downloading..." : "Download"}
+    </Button>
   );
 }

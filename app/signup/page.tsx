@@ -42,8 +42,8 @@ export default function SignupPage() {
             <Input placeholder="Email address" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} className="sm:col-span-2" />
             <Input placeholder="Password" type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} className="sm:col-span-2" />
             <select className="sm:col-span-2 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-950 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white" value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as "customer" | "vendor" }))}>
-              <option value="customer">Shop as a customer</option>
-              <option value="vendor">Sell as a professor or vendor</option>
+              <option value="customer">Shop as a student</option>
+              <option value="vendor">Sell as a lecturer or vendor</option>
             </select>
           </div>
           <Button className="mt-5 w-full" type="submit" disabled={status === "loading"}>

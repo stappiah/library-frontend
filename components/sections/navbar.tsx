@@ -14,7 +14,7 @@ const navLinks = [
   { href: "/shop", label: "Shop E-books" },
   // { href: "/categories", label: "Faculties" },
   { href: "/wishlist", label: "Wishlist" },
-  { href: "/vendors", label: "Lecturers" },
+  // { href: "/vendors", label: "Lecturer Portal" },
   { href: "/account", label: "Account / My Library" },
 ];
 
@@ -63,11 +63,14 @@ export function Navbar() {
               {item.label}
             </Link>
           ))}
-          {isLecturer && (
+          {/* {isLecturer && (
             <Link href="/vendors" className="font-semibold text-blue-600 transition hover:text-blue-800">
               Lecturer Portal
             </Link>
-          )}
+          )} */}
+          {isLecturer && (<Link href="/vendors" className="transition hover:text-zinc-950 dark:hover:text-white">
+              Lecturer Portal
+            </Link>)}
         </nav>
 
         <div className="hidden flex-1 items-center justify-center px-6 md:flex">
@@ -115,7 +118,7 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
-            {isLecturer && (
+            {/* {isLecturer && (
               <Link
                 href="/vendors"
                 className="block rounded-2xl px-3 py-2 text-sm font-semibold text-blue-600"
@@ -123,7 +126,7 @@ export function Navbar() {
               >
                 Lecturer Portal
               </Link>
-            )}
+            )} */}
           </div>
         </motion.div>
       )}

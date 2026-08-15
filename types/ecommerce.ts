@@ -54,6 +54,50 @@ export interface VendorProfile {
   commissionRate?: number;
 }
 
+export interface VendorOrderList {
+  id: number | string;
+
+  orderNumber: string;
+
+  customerName: string;
+  customerEmail: string;
+
+  email: string;
+
+  status: string;
+
+  vendorTotal: number;
+
+  itemsCount: number;
+
+  createdAt: string;
+  updatedAt: string;
+
+  items: OrderItem[];
+}
+
+export interface UserOrderList {
+  id: number | string;
+
+  orderNumber: string;
+
+  customerName: string;
+  customerEmail: string;
+
+  email: string;
+
+  status: string;
+
+  vendorTotal: number;
+
+  itemsCount: number;
+
+  createdAt: string;
+  updatedAt: string;
+
+  items: OrderItem[];
+}
+
 export interface Category {
   id: number | string;
   name: string;
@@ -138,15 +182,22 @@ export interface OrderSummary {
 }
 
 export interface OrderItem {
-  id: number;
-  productId: number;
+  id: number | string;
+
+  productId: number | string;
   title: string;
+
   quantity: number;
+
   unitPrice: number;
   discountPrice?: number | null;
+
   subtotal: number;
-  vendorId?: number;
+
+  vendorId?: number | string;
   vendorName?: string;
+
+  product?: Product;
 }
 
 export interface Payment {

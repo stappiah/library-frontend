@@ -11,9 +11,13 @@ import type {
   UserProfile,
   VendorProfile,
   ProductType,
+  VendorOrderList,
+  UserOrderList,
 } from "@/types/ecommerce";
 
 import { apiFetch } from "@/lib/api/backend";
+import { getApiBaseUrl } from "@/lib/api/api-config";
+import { readAccessToken, readRefreshToken, writeAccessToken } from "@/lib/api/auth-storage";
 import { testimonials } from "@/data/mock";
 
 /* -------------------------------------------------------------------------- */
@@ -68,6 +72,25 @@ type BackendVendor = {
   created_at?: string;
   updated_at?: string;
 };
+
+export interface BackendVendorOrder {
+  id: number;
+  order_number: string;
+
+  customer_name: string;
+  customer_email: string;
+
+  email: string;
+  status: string;
+
+  items: BackendOrderItem[];
+  item_count: number;
+
+  vendor_total: number;
+
+  created_at: string;
+  updated_at: string;
+}
 
 type BackendBook = {
   id: string | number;
@@ -298,6 +321,56 @@ function normalizeVendor(
   };
 }
 
+function normalizeVendorOrder(
+  order: BackendVendorOrder,
+): VendorOrderList | null {
+  if (!order || !order.id) {
+    return null;
+  }
+
+  return {
+    id: order.id,
+
+    orderNumber: order.order_number,
+
+    customerName: order.customer_name,
+    customerEmail: order.customer_email,
+
+    email: order.email,
+
+    status: order.status,
+
+    vendorTotal: Number(order.vendor_total ?? 0),
+
+    itemsCount: order.item_count ?? order.items?.length ?? 0,
+
+    createdAt: order.created_at,
+    updatedAt: order.updated_at,
+
+    items: (order.items ?? []).map((item) => ({
+      id: item.id,
+
+      productId: item.book?.id ?? 0,
+      title: item.book?.title ?? "",
+
+      quantity: item.quantity ?? 1,
+
+      unitPrice: Number(item.price ?? 0),
+      discountPrice:
+        item.discount_price !== null
+          ? Number(item.discount_price)
+          : null,
+
+      subtotal: Number(item.line_total ?? 0),
+
+      vendorId: item.book?.vendor?.id,
+      vendorName: item.book?.vendor?.name,
+
+      product: item.book ? normalizeProduct(item.book) : undefined,
+    })),
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Product normalization                                                      */
 /* -------------------------------------------------------------------------- */
@@ -503,6 +576,55 @@ export async function getVendors(): Promise<VendorProfile[]> {
   } catch (error) {
     console.error(
       "Failed to fetch vendors:",
+      error,
+    );
+
+    return [];
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Vendor orders                                                              */
+/* -------------------------------------------------------------------------- */
+
+export async function getVendorOrders(): Promise<VendorOrderList[]> {
+  try {
+    const response = await apiFetch<BackendVendorOrder[]>({
+      path: "/api/v1/vendor-orders/",
+    });
+
+    return response
+      .map(normalizeVendorOrder)
+      .filter(
+        (order): order is UserOrderList =>
+          order !== null,
+      );
+  } catch (error) {
+    console.error(
+      "Failed to fetch vendor orders:",
+      error,
+    );
+
+    return [];
+  }
+}
+
+// User's orders
+export async function getUserOrders(): Promise<UserOrderList[]> {
+  try {
+    const response = await apiFetch<BackendVendorOrder[]>({
+      path: "/api/v1/user-orders/",
+    });
+
+    return response
+      .map(normalizeVendorOrder)
+      .filter(
+        (order): order is VendorOrderList =>
+          order !== null,
+      );
+  } catch (error) {
+    console.error(
+      "Failed to fetch vendor orders:",
       error,
     );
 
@@ -1260,6 +1382,7 @@ export interface CreateOrderData {
   email?: string;
   notes?: string;
   phone?: string;
+  status?: string;
   shipping_address?: string;
   billing_address?: string;
 
@@ -1498,11 +1621,53 @@ export async function getDownloads(
 
 export async function downloadProduct(
   slug: string,
-  accessToken: string,
+  accessToken?: string | null,
 ): Promise<Blob> {
-  return apiFetch<Blob>({
-    path: `/api/v1/books/${encodeURIComponent(slug)}/download/`,
-    method: "GET",
-    accessToken,
+  const token = accessToken ?? readAccessToken();
+  const base = getApiBaseUrl();
+  const url = new URL(`/api/v1/books/${encodeURIComponent(slug)}/download/`, base.endsWith('/') ? base : base + '/');
+
+  const res = await fetch(url.toString(), {
+    method: 'GET',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
+
+  if (!res.ok) {
+    // If unauthorized, attempt refresh with stored refresh token and retry once.
+    if (res.status === 401 || res.status === 403) {
+      const refresh = readRefreshToken();
+      if (refresh) {
+        try {
+          const refreshUrl = new URL('/token/refresh/', base.endsWith('/') ? base : base + '/');
+          const rres = await fetch(refreshUrl.toString(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ refresh }),
+          });
+
+          if (rres.ok) {
+            const parsed = await rres.json().catch(() => ({}));
+            const newToken = (parsed && (parsed.access || parsed.accessToken || parsed.access_token)) || null;
+            if (newToken && typeof newToken === 'string') {
+              writeAccessToken(newToken);
+              const retry = await fetch(url.toString(), {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${newToken}` },
+              });
+              if (retry.ok) return await retry.blob();
+              const txt = await retry.text().catch(() => '');
+              throw new Error(`Download failed after refresh: ${retry.status} ${retry.statusText} ${txt ? '| ' + txt.slice(0,200) : ''}`);
+            }
+          }
+        } catch (err) {
+          // fall through to error below
+        }
+      }
+    }
+
+    const text = await res.text().catch(() => '');
+    throw new Error(`Download failed: ${res.status} ${res.statusText} ${text ? '| ' + text.slice(0, 200) : ''}`);
+  }
+
+  return await res.blob();
 }

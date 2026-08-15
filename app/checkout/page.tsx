@@ -76,6 +76,7 @@ export default function CheckoutPage() {
         shipping_address: "E-book (digital delivery)",
         phone: form.mobileMoneyNumber,
         email: form.email,
+        status: "paid",
         billing_address: "E-book (digital delivery)",
         items: safeCart.map((item) => ({ book_id: item.product.id, quantity: item.quantity })),
         notes: `Mobile Money: ${form.mobileMoneyNumber}. Name: ${form.name}. E-book order.`,
