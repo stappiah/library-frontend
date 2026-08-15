@@ -15,6 +15,9 @@ export default function AccountPage() {
   const [orders, setOrders] = useState<UserOrderList[]>([]);
   const [loading, setLoading] = useState(true);
 
+  console.log("user token", accessToken);
+  
+
   // useEffect(() => {
   //   if (!accessToken) {
   //     setOrders([]);
