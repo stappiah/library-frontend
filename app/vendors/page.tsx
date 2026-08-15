@@ -141,7 +141,7 @@ export default function VendorsPage() {
   };
 
   const totalSales = orders
-  .filter((order) => order.paymentStatus === "paid")
+  .filter((order) => order.status === "paid")
   .reduce((total, order) => total + order.amount, 0);
 
   return (
