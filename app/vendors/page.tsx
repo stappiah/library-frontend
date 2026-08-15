@@ -14,7 +14,12 @@ import { Button } from "@/components/ui/button";
 import { getVendorOrders, getVendors } from "@/lib/services/catalog-service";
 import type { VendorProfile } from "@/types/ecommerce";
 
-type OrderStatus = "pending" | "processing" | "completed" | "cancelled" | "paid";
+type OrderStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "cancelled"
+  | "paid";
 
 type VendorOrder = {
   id: number;
@@ -82,7 +87,9 @@ export default function VendorsPage() {
   const [updatingOrder, setUpdatingOrder] = useState<number | null>(null);
 
   useEffect(() => {
-    getVendors().then(setVendors).catch(() => setVendors([]));
+    getVendors()
+      .then(setVendors)
+      .catch(() => setVendors([]));
   }, []);
 
   useEffect(() => {
@@ -110,12 +117,7 @@ export default function VendorsPage() {
       });
   }, []);
 
-
-
-  const updateOrderStatus = async (
-    orderId: number,
-    status: OrderStatus
-  ) => {
+  const updateOrderStatus = async (orderId: number, status: OrderStatus) => {
     setUpdatingOrder(orderId);
 
     try {
@@ -130,8 +132,8 @@ export default function VendorsPage() {
       // Temporary local update
       setOrders((currentOrders) =>
         currentOrders.map((order) =>
-          order.id === orderId ? { ...order, status } : order
-        )
+          order.id === orderId ? { ...order, status } : order,
+        ),
       );
     } catch (error) {
       console.error("Failed to update order:", error);
@@ -194,7 +196,11 @@ export default function VendorsPage() {
             <span className="font-semibold text-zinc-900 dark:text-white">
               {orders.length}
             </span>
-            total orders · GH₵ {totalSales.toFixed(2)} Total sales
+            Total orders
+            <span className="font-semibold text-zinc-900 dark:text-white">
+              · GH₵ {totalSales.toFixed(2)}
+            </span>
+            Total sales
           </div>
         </div>
 
@@ -219,7 +225,6 @@ export default function VendorsPage() {
                   <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">
                     Amount
                   </th>
-
                 </tr>
               </thead>
 
@@ -291,7 +296,6 @@ export default function VendorsPage() {
                           GH₵ {order.amount.toFixed(2)}
                         </p>
                       </td>
-
                     </tr>
                   ))
                 )}
